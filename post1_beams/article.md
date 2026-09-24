@@ -23,6 +23,7 @@ but quantization belongs there.
 Light seems able to take on any shape you shine it through — a keyhole, a leaf, a nebula. In reality none of those shapes should survive: send light through an opening of any form and diffraction blurs it into a formless smear within meters. Yet a laser beam refuses to do this — its bright spot travels for kilometers and comes out looking almost exactly as it started. How can that be?
 
 It turns out there are some beam shapes that have this property: they may grow as they travel, but they keep their shape. Look closer, and some of these beams carry momentum sideways, circling the axis instead of pointing straight ahead. That sideways momentum is orbital angular momentum — real enough to make an object rotate.
+
 ## Diffraction Destroys Shapes — Yet a Gaussian Survives
 
 Consider a beam that travels in the *z* direction and has an amplitude only in *x* direction for simplicity. Once launched, its transverse profile evolves according to one equation — the paraxial wave equation,
@@ -43,18 +44,18 @@ as an ansatz, and it satisfies the equation exactly — the only z-dependence ne
 
 ## Some Shapes Are Made to Propagate
 
-The Gaussian is not a special exception — it is only the simplest member of a family. Instead of replacing the Gaussian envelope, keep it and allow an extra transverse shape to sit on top of it. Write the rescaled coordinate as ξ = √2 x/w(z), and try
+The Gaussian is not a special exception — it is only the simplest member of a family. Keep the same curved wavefront and overall phase structure as before, but replace the fixed Gaussian bump with some other transverse shape h(ξ), written in the rescaled coordinate ξ = √2 x/w(z):
 
 $$
-u(x,z)=\frac{1}{\sqrt{w(z)}}
-\exp\left[-\frac{x^2}{w(z)^2}\right]
+u_n(x,z)=\frac{1}{\sqrt{w(z)}}
 \exp\left[\frac{ikx^2}{2R(z)}\right]
-\exp[-i\psi(z)/2].
+\exp\left[-i\left(n+\tfrac{1}{2}\right)\psi(z)\right]
+h(\xi).
 $$
 
-The first exponential is the same Gaussian envelope as before. The function h(ξ) now describes any additional structure across the beam.
+The curvature term and the overall phase are the same as before. The function h(ξ) now carries the Gaussian envelope itself, together with whatever additional structure sits on top of it.
 
-Substitute this into the paraxial equation, and almost all of the z-dependence separates out: the beam has the same expanding width w(z), the same curved wavefront R(z), and a Gouy phase that depends on the mode order. What remains is a remarkably simple equation for h(ξ) alone:
+Substitute this into the paraxial equation, and almost all of the z-dependence separates out: the beam has the same expanding width w(z), the same curved wavefront R(z), and a Gouy phase that depends on the mode order n. What remains is a remarkably simple equation for h(ξ) alone:
 
 $$
 h''(\xi) - 2\xi\,h'(\xi) + 2n\,h(\xi) = 0
@@ -70,7 +71,7 @@ For n = 0, H₀ = 1, so we recover the ordinary Gaussian. For n = 1, 2, 3, … t
 
 This kind of quantization is nothing exotic — it's the same reason a guitar string only rings at certain frequencies: a differential equation plus a boundary condition (stay finite, don't blow up) forces a continuous problem to admit only a discrete set of solutions. No energy levels, no ℏ, nothing quantum required.
 
-The genuinely striking part is that the same equation reappears with a different meaning in quantum mechanics. The Schrödinger equation for a two-dimensional harmonic oscillator has identical mathematical form — but there, the roles are different: it governs a wavefunction evolving in time, and the integer n labels discrete energy. Our beam equation governs a field's shape evolving in space (z stands in for t), and n labels discrete transverse shapes, not discrete energies — a beam of order n can carry any energy at all; nothing here restricts it. Same math, two completely different physical quantities being quantized, for two completely different physical reasons.
+The genuinely striking part is that the same equation reappears with a different meaning in quantum mechanics. The Schrödinger equation for a two-dimensional harmonic oscillator has identical mathematical form — but there, the roles are different: it governs a wavefunction evolving in time, and the integer n labels discrete energy. Our beam equation governs a field's shape evolving in space (z stands in for t), and n labels discrete transverse shapes, not discrete energies — a beam of order n can carry any energy at all; nothing here restricts it. Same math, two completely different physical quantities being quantized, for two completely different physical reasons [1].
 
 ![Figure 2](../outputs/figure_2_hermite_gaussian_modes.png)
 > Caption: **Figure 2. Gaussian beams come in families. The Hermite–Gaussian modes are labelled by two integers, n and m, which count the transverse structure in the horizontal and vertical directions. The familiar Gaussian beam is simply the lowest member, HG₀₀. Image by author.**
@@ -104,13 +105,11 @@ Write $\text{HG}_{10} + i\,\text{HG}_{01}$ in polar coordinates, $x = ρ\cosφ$,
 
 $$\text{HG}_{10} + i\,\text{HG}_{01} \;\propto\; (x+iy)\cdot(\text{envelope}) \;=\; ρ\,e^{iφ}\cdot(\text{envelope})$$
 
-An explicit $e^{iφ}$ falls out.  Walk once around the beam axis, φ goes from 0 to 2π, and the phase completes one full turn along with it. 
-
-Nothing like this happened for any of the real combinations — HG₁₀, HG₀₁, or their sum — where the phase only jumped by π across a node. Here the phase winds smoothly and continuously around the axis.
-More generally, a combination that winds ℓ times, $e^{iℓφ}$, is possible for higher-order modes — ℓ = 1 was just the simplest case. The doughnut you see is the shadow this winding casts on the intensity; the winding itself is the real object.
-
 An explicit $e^{iφ}$ falls out. Walk once around the beam axis, φ goes from 0 to 2π, and the phase completes one full turn along with it. Follow a surface of constant phase as you also move forward in z, and that surface traces a helix around the beam axis.
 
+Nothing like this happened for any of the real combinations — HG₁₀, HG₀₁, or their sum — where the phase only jumped by π across a node. Here the phase winds smoothly and continuously around the axis.
+
+More generally, a combination that winds ℓ times, $e^{iℓφ}$, is possible for higher-order modes — ℓ = 1 was just the simplest case. The doughnut you see is the shadow this winding casts on the intensity; the winding itself is the real object.
 
 ```{=html}
 <!--
@@ -118,13 +117,14 @@ Possible pull quote:
 The doughnut is what we see. The twist is in the phase.
 -->
 ```
+
 ## Mode conversion in experiments
 
 This isn't just algebra — the same conversion can be done with real optics. Take a Hermite-Gaussian beam oriented at 45° to a pair of cylindrical lenses. In the lenses' own frame, that diagonal mode is nothing more than the horizontal and vertical modes added together, HG₁₀ + HG₀₁ — the "in-phase" combination that, as we saw, is just a rotated pair of lobes.
 
 The trick is what happens as the beam passes between the two lenses. Because the lenses focus the beam differently along their two axes, the horizontal and vertical components pick up different amounts of Gouy phase on the way through — an astigmatic version of the same phase you tracked earlier, now split unevenly between x and y instead of shared equally. Tune the lens spacing so that difference comes out to exactly a quarter cycle, and the output is HG₁₀ + i HG₀₁ — precisely the combination that produces the doughnut.
 
-This mode converter was built and demonstrated in 1993 by Beijersbergen and colleagues in Leiden, using nothing more exotic than two cylindrical lenses at a fixed separation. Send in a diagonally-oriented two-lobed beam, and a vortex comes out the other side — the winding phase isn't a mathematical curiosity conjured by adding amplitudes on paper, it's something a beam of light can be made to acquire simply by passing through the right piece of glass.
+This mode converter was built and demonstrated in 1993 by Beijersbergen and colleagues in Leiden [2], using nothing more exotic than two cylindrical lenses at a fixed separation. Send in a diagonally-oriented two-lobed beam, and a vortex comes out the other side — the winding phase isn't a mathematical curiosity conjured by adding amplitudes on paper, it's something a beam of light can be made to acquire simply by passing through the right piece of glass.
 
 ![Figure 4](../outputs/figure_4_cylindrical_mode_converter.png)
 > Caption: **Figure 4. Turning lobes into a vortex. A pair of cylindrical lenses converts a Hermite–Gaussian mode, oriented at 45° to the lens axes, into a Laguerre–Gaussian mode. The lenses focus the beam differently along the two transverse directions, introducing the relative phase shift that turns the two-lobed input into a doughnut-shaped output. Image by author.**
@@ -152,9 +152,9 @@ We've seen that a beam can carry orbital angular momentum, and that the higher t
 
 It has to come from the lenses. There's no other source. If the light picks up clockwise orbital angular momentum on the way through, the lens system has to recoil counterclockwise — a real, physical kick, exactly as much as the light gained.
 
-This wasn't obvious in 1992. Allen, Beijersbergen, Spreeuw and Woerdman, working in Leiden, were the ones who first worked out that a light beam's spatial structure alone carries angular momentum [1]. And they didn't stop at the idea: they wanted to *weigh* it. Robert Spreeuw, one of the four, later wrote a personal account of what came next [3]. They hung a pair of cylindrical lenses on a torsion fibre in vacuum and sent a vortex beam through, looking for the tiny twist as the lenses absorbed the reaction. It turned out to be "prohibitively difficult," in Spreeuw's own words — buried under systematic noise no amount of care could fully remove. Sometimes physics is exactly this: right idea, right setup, and nature simply won't hand you a clean number.
+This wasn't obvious in 1992. Allen, Beijersbergen, Spreeuw and Woerdman, working in Leiden, were the ones who first worked out that a light beam's spatial structure alone carries angular momentum [3]. And they didn't stop at the idea: they wanted to *weigh* it. Robert Spreeuw, one of the four, later wrote a personal account of what came next [4]. They hung a pair of cylindrical lenses on a torsion fibre in vacuum and sent a vortex beam through, looking for the tiny twist as the lenses absorbed the reaction. It turned out to be "prohibitively difficult," in Spreeuw's own words — buried under systematic noise no amount of care could fully remove. Sometimes physics is exactly this: right idea, right setup, and nature simply won't hand you a clean number.
 
-The direct proof came from somewhere else entirely. In 1995, He, Friese, Heckenberg and Rubinsztein-Dunlop skipped the torsion pendulum and went straight for a particle sitting in the beam itself [4]. Small absorbing particles illuminated by a vortex beam started to rotate. Reverse the vortex's handedness, and the particles reversed too.
+The direct proof came from somewhere else entirely. In 1995, He, Friese, Heckenberg and Rubinsztein-Dunlop skipped the torsion pendulum and went straight for a particle sitting in the beam itself [5]. Small absorbing particles illuminated by a vortex beam started to rotate. Reverse the vortex's handedness, and the particles reversed too.
 
 So the chain is complete: a stable transverse mode → a winding phase → sideways momentum → orbital angular momentum → mechanical rotation.
 
@@ -169,13 +169,12 @@ That is where the next post begins.
 
 ## References
 
-[1] L. Allen, M. W. Beijersbergen, R. J. C. Spreeuw, and J. P. Woerdman, "Orbital angular momentum of light and the transformation of Laguerre-Gaussian laser modes," *Phys. Rev. A* **45**, 8185–8189 (1992). https://doi.org/10.1103/PhysRevA.45.8185
+[1] G. Nienhuis and L. Allen, "Paraxial wave optics and harmonic oscillators," *Phys. Rev. A* **48**, 656–665 (1993). https://doi.org/10.1103/PhysRevA.48.656
 
 [2] M. W. Beijersbergen, L. Allen, H. E. L. O. van der Veen, and J. P. Woerdman, "Astigmatic laser mode converters and transfer of orbital angular momentum," *Opt. Commun.* **96**, 123–132 (1993). https://doi.org/10.1016/0030-4018(93)90535-D
 
-[3] R. J. C. Spreeuw, "Spiraling light: from donut modes to a Magnus effect analogy," *Nanophotonics* **11**, 633–644 (2021). https://doi.org/10.1515/nanoph-2021-0458
+[3] L. Allen, M. W. Beijersbergen, R. J. C. Spreeuw, and J. P. Woerdman, "Orbital angular momentum of light and the transformation of Laguerre-Gaussian laser modes," *Phys. Rev. A* **45**, 8185–8189 (1992). https://doi.org/10.1103/PhysRevA.45.8185
 
-[4] H. He, M. E. J. Friese, N. R. Heckenberg, and H. Rubinsztein-Dunlop, "Direct observation of transfer of angular momentum to absorptive particles from a laser beam with a phase singularity," *Phys. Rev. Lett.* **75**, 826–829 (1995). https://doi.org/10.1103/PhysRevLett.75.826
+[4] R. J. C. Spreeuw, "Spiraling light: from donut modes to a Magnus effect analogy," *Nanophotonics* **11**, 633–644 (2021). https://doi.org/10.1515/nanoph-2021-0458
 
-[5] G. Nienhuis and L. Allen, "Paraxial wave optics and harmonic oscillators," *Phys. Rev. A* **48**, 656–665 (1993). https://doi.org/10.1103/PhysRevA.48.656
-
+[5] H. He, M. E. J. Friese, N. R. Heckenberg, and H. Rubinsztein-Dunlop, "Direct observation of transfer of angular momentum to absorptive particles from a laser beam with a phase singularity," *Phys. Rev. Lett.* **75**, 826–829 (1995). https://doi.org/10.1103/PhysRevLett.75.826
