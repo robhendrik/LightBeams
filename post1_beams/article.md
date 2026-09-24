@@ -1,8 +1,6 @@
 # Why Doesn't a Laser Beam Lose Its Shape?
 
-*Light passing through a shape quickly turns into a blob. Yet laser
-beams seem to keep their shape. What does this have to do with momentum
---- and how can light make matter rotate?*
+*Shine light through an opening of any shape and diffraction smears it into a blob. Laser beams somehow survive intact — and figuring out how leads straight to a surprising twist.*
 
 ```{=html}
 <!--
@@ -17,21 +15,24 @@ Keep this post classical. The harmonic-oscillator connection can foreshadow Post
 but quantization belongs there.
 -->
 ```
-## Diffraction Destroys Shapes --- Yet Laser Beams Survive
 
-Start with the puzzle.
+Light seems able to take on any shape you shine it through — a keyhole, a leaf, a nebula. In reality none of those shapes should survive: send light through an opening of any form and diffraction blurs it into a formless smear within meters. Yet a laser beam refuses to do this — its bright spot travels for kilometers and comes out looking almost exactly as it started. How can that be?
 
-A beam of light passing through a circular hole initially has a
-perfectly clear shape. Let it propagate, however, and diffraction
-immediately starts changing that shape. In the far field the circle has
-become an Airy pattern.
+It turns out there are some beam shapes that have this property: they may grow as they travel, but they keep their shape. Look closer, and some of these beams carry momentum sideways, circling the axis instead of pointing straight ahead. That sideways momentum is orbital angular momentum — real enough to make an object rotate.
+## Diffraction Destroys Shapes — Yet a Gaussian Survives
 
-A laser beam behaves differently. A Gaussian beam spreads too, but its
-transverse profile remains Gaussian. It does not simply reproduce a
-picture carried along by the light. It is a propagation mode.
+Consider a beam that travels in the *z* direction and has an amplitude only in *x* direction for simplicity. Once launched, its transverse profile evolves according to one equation — the paraxial wave equation,
 
-This is the first conceptual step: **some transverse shapes are natural
-solutions of the wave equation.**
+$$i \frac{\partial u}{\partial z} = -\frac{1}{2k} \frac{\partial^2 u}{\partial x^2}$$
+
+— which says how the shape *u(x)* at one distance determines the shape at the next. Crucially, u depends on z: whatever profile you start with, this equation reshapes it as it travels. A sharp feature — a narrow slit, a hard edge — corresponds to rapid variation in x, and rapid variation is exactly what the second-derivative term acts on most strongly. So a shape that starts out crisp does not, in general, stay crisp; the equation itself is a rule for how much a profile *must* change with z, not whether it does.
+
+A Gaussian avoids this fate, and the equation shows why directly. Try
+
+$$u(x,z) = \frac{1}{\sqrt{w(z)}} \exp\left[-\frac{x^2}{w(z)^2}\right] \exp[iφ(z)]$$
+
+as an ansatz, and it satisfies the equation exactly — the only z-dependence needed is in the width w(z) and an overall phase φ(z); the underlying shape, "Gaussian," never changes. There's no residual term forcing the profile to distort into something else. The beam widens, but it does so by stretching the same curve, not by growing new structure. A laser beam's spot isn't a fixed picture being carried along and gradually blurred — it's one of the rare shapes the equation lets pass through essentially untouched, which raises the natural question: is it the only one?
+
 
 **Figure 1 --- A shape versus a mode.** A hard circular aperture and a
 Gaussian TEM₀₀ beam start with roughly the same diameter. After
@@ -42,23 +43,21 @@ propagation mode.
 
 ## Some Shapes Are Made to Propagate
 
-The familiar Gaussian spot is only the simplest member of a much larger
-family.
+The Gaussian is not a special exception — it is only the simplest member of a family. Try a more general version of the same ansatz, keeping the same width w(z) and radius of curvature but replacing the fixed Gaussian bump with some other transverse shape h(ξ), written in the rescaled coordinate ξ = √2 x/w(z):
 
-Introduce the Hermite--Gaussian modes: TEM₀₀, TEM₁₀, TEM₀₁ and a few
-higher-order examples. Their lobes and nodes may look increasingly
-elaborate, but each is a well-defined solution that propagates in a
-controlled way.
+$$u_n(x,z) = \frac{1}{\sqrt{w(z)}} \exp\left[\frac{ikx^2}{2R(z)}\right] \exp[-i(n+\tfrac{1}{2})ψ(z)]\, h(ξ)$$
 
-This is where the mathematical structure begins to appear. In the
-paraxial approximation, the transverse modes can be organized with
-mathematics closely related to the two-dimensional harmonic oscillator.
-The resemblance is not just visual bookkeeping: the same ladder-operator
-structure can be used to generate the family of modes.
+Substitute this into the paraxial equation, and almost everything from before goes through unchanged — the same w(z), the same curvature R(z). What's left over is a single condition that h(ξ) alone must satisfy, with all the z-dependence cancelled out:
 
-Keep the oscillator connection light here. It is useful classical
-mathematics now, and gives us something to return to in Post 2 when the
-field itself is quantized.
+$$h''(ξ) - 2ξ\,h'(ξ) + 2n\,h(ξ) = 0$$
+
+This equation only has solutions that stay finite, rather than blowing up as ξ grows, when n is a non-negative integer: 0, 1, 2, … Each integer picks out one particular shape hₙ(ξ) — a Gaussian multiplied by a polynomial with n nodes. n = 0 recovers the plain Gaussian from before. n = 1, 2, 3, … are new shapes, each with its own pattern of lobes, and each one just as immune to diffraction's usual smoothing as the Gaussian was. The equation doesn't hand us one lucky survivor — it hands us an entire ladder of them.
+
+This equation only has solutions that stay finite, rather than blowing up as ξ grows, when n is a non-negative integer: 0, 1, 2, … Each integer picks out one particular shape hₙ(ξ) — a Gaussian multiplied by a polynomial with n nodes. n = 0 recovers the plain Gaussian from before. n = 1, 2, 3, … are new shapes, each with its own pattern of lobes, and each one just as immune to diffraction's usual smoothing as the Gaussian was. The equation doesn't hand us one lucky survivor — it hands us an entire ladder of them.
+
+This kind of quantization is nothing exotic — it's the same reason a guitar string only rings at certain frequencies: a differential equation plus a boundary condition (stay finite, don't blow up) forces a continuous problem to admit only a discrete set of solutions. No energy levels, no ℏ, nothing quantum required.
+
+The genuinely striking part is that the same equation reappears with a different meaning in quantum mechanics. The Schrödinger equation for a two-dimensional harmonic oscillator has identical mathematical form — but there, the roles are different: it governs a wavefunction evolving in time, and the integer n labels discrete energy. Our beam equation governs a field's shape evolving in space (z stands in for t), and n labels discrete transverse shapes, not discrete energies — a beam of order n can carry any energy at all; nothing here restricts it. Same math, two completely different physical quantities being quantized, for two completely different physical reasons.
 
 **Figure 2 --- A family of beams.** The Gaussian TEM₀₀ mode is only the
 ground floor. Higher-order Hermite--Gaussian modes form a structured
@@ -68,27 +67,21 @@ two-dimensional harmonic oscillator.
 
 ## Two Different Beams Can Propagate in Exactly the Same Way
 
-Now focus on TEM₁₀ and TEM₀₁.
+## Two Different Beams Can Propagate in Exactly the Same Way
 
-They look different, but they belong to the same degenerate mode order:
-they accumulate the same longitudinal and Gouy phase as they propagate.
-That means they can be combined coherently without their relative
-structure washing away.
+Now imagine a real beam, varying in both x and y. Since the paraxial equation has no term mixing the two directions, a product of two of the 1D shapes found earlier,
 
-Put them together directly and we obtain another pattern. Put them
-together with a quarter-cycle phase difference,
+$$u_{n,m}(x,y,z) = χ_n(x)\,χ_m(y)$$
 
-**HG₁₀ + i HG₀₁,**
+is itself an exact solution — solve x and y separately, then just multiply. Its Gouy phase is $(n+m+1)ψ(z)$, and only the *sum* n+m enters, not n and m individually. That single fact is the key to everything that follows: two beams with different shapes but the same n+m accumulate identical phase as they propagate, so their relative phase never drifts — any combination fixed at the waist stays fixed forever.
 
-and something much more interesting appears: a Laguerre--Gaussian mode.
+Take the simplest pair with n+m=1: TEM₁₀ and TEM₀₁, one lobed along x, the other along y. Add and subtract them, and the result is unsurprising — the same two-lobed pattern, just rotated by 45°. Recombining real modes with real coefficients only ever rotates the picture; it can't do anything more interesting, because both ingredients are already real, node-and-lobe patterns.
 
-The intensity becomes doughnut-shaped. More importantly, the phase winds
-around the dark centre.
+But nothing forces the coefficient to be real. Combine them with a *quarter-cycle phase* instead of a sign —
 
-This is also something optics can do physically, not merely
-algebraically. Astigmatic mode converters built from cylindrical lenses
-can transform between Hermite--Gaussian and Laguerre--Gaussian modes by
-introducing the required relative phase.
+$$\text{HG}_{10} + i\,\text{HG}_{01}$$
+
+— and the result stops looking like a rotated version of anything you started with. The intensity turns into a doughnut, and buried in that combination is a phase that winds smoothly around the dark centre, rather than flipping sign across a node the way every real combination did.
 
 **Figure 3 --- From two lobes to a vortex.** Two degenerate
 Hermite--Gaussian modes, HG₁₀ and HG₀₁, combined with a quarter-cycle
@@ -99,25 +92,18 @@ transformation experimentally.
 
 ## The Doughnut Is Hiding a Twist
 
-A doughnut-shaped intensity profile is easy to see, but it is not what
-gives the beam orbital angular momentum.
+## The Doughnut Is Hiding a Twist
 
-The important part is the phase.
+The doughnut-shaped intensity is easy to see, but it isn't the interesting part — a ring of light, by itself, is just a shape like any other. The interesting part is hidden in the phase.
 
-For an LG mode it contains a factor of the form
+Write $\text{HG}_{10} + i\,\text{HG}_{01}$ in polar coordinates, $x = ρ\cosφ$, $y = ρ\sinφ$. Since $\text{HG}_{10}\propto x$ and $\text{HG}_{01}\propto y$ (times the same radial envelope),
 
-**exp(iℓφ).**
+$$\text{HG}_{10} + i\,\text{HG}_{01} \;\propto\; (x+iy)\cdot(\text{envelope}) \;=\; ρ\,e^{iφ}\cdot(\text{envelope})$$
 
-Move once around the beam axis and the phase advances by ℓ complete
-turns. The wavefront is therefore helical rather than flat.
+An explicit $e^{iφ}$ falls out. Walk once around the beam axis, φ goes from 0 to 2π, and the phase completes one full turn along with it. Nothing like this happened for any of the real combinations — HG₁₀, HG₀₁, or their sum — where the phase only ever jumped by a flat π across a node. This is smooth and continuous: the phase front isn't a flat plane, and it isn't a set of flipped plane segments either. It's a helix, winding once around the axis for every step forward in z.
 
-The local momentum of a wave points normal to its phase front. A helical
-phase front therefore gives the light a momentum component around the
-beam axis. The beam is travelling forward, but some of its momentum
-points sideways.
+More generally, a combination that winds ℓ times, $e^{iℓφ}$, is possible for higher-order modes — ℓ = 1 was just the simplest case. The doughnut you see is the shadow this winding casts on the intensity; the winding itself is the real object.
 
-That circulating momentum is orbital angular momentum. For a pure LG
-mode, the integer ℓ labels the handedness and amount of that twist.
 
 ```{=html}
 <!--
