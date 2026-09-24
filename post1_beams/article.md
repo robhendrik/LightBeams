@@ -2,6 +2,10 @@
 
 *Shine light through an opening of any shape and diffraction smears it into a blob. Laser beams somehow survive intact — and figuring out how leads straight to a surprising twist.*
 
+![Feature_image](../outputs/feature_twisted_light.png)
+> Caption: **A helical wavefront — light with a twist.**
+> Alt text: A monochrome 3D rendering of a helical optical wavefront twisting around the direction of propagation, illustrating the spiral phase structure of light carrying orbital angular momentum.
+
 ```{=html}
 <!--
 POST 1 STORY ARC
@@ -33,13 +37,9 @@ $$u(x,z) = \frac{1}{\sqrt{w(z)}} \exp\left[-\frac{x^2}{w(z)^2}\right] \exp[iφ(z
 
 as an ansatz, and it satisfies the equation exactly — the only z-dependence needed is in the width w(z) and an overall phase φ(z); the underlying shape, "Gaussian," never changes. There's no residual term forcing the profile to distort into something else. The beam widens, but it does so by stretching the same curve, not by growing new structure. A laser beam's spot isn't a fixed picture being carried along and gradually blurred — it's one of the rare shapes the equation lets pass through essentially untouched, which raises the natural question: is it the only one?
 
-
-**Figure 1 --- A shape versus a mode.** A hard circular aperture and a
-Gaussian TEM₀₀ beam start with roughly the same diameter. After
-propagation, the aperture has diffracted into an Airy-like pattern,
-while the Gaussian has expanded but kept the same basic shape. A laser
-beam is not a rigid cylinder of light; its transverse profile is a
-propagation mode.
+![Figure 1](../outputs/figure_1_diffraction_vs_gaussian.png)
+> Caption: **Figure 1. Not every beam keeps its shape. After 5 m of free-space propagation, a hard-edged circular beam develops diffraction rings, while a Gaussian beam simply broadens while retaining its Gaussian profile. Both beams were propagated using the same angular-spectrum calculation. Image by author.**
+> Alt-text: Four-panel comparison of a hard-edged circular beam and a Gaussian beam before and after 5 m of propagation. The circular beam spreads into a broad central spot surrounded by diffraction rings, while the Gaussian beam becomes wider but retains its smooth Gaussian shape.
 
 ## Some Shapes Are Made to Propagate
 
@@ -59,13 +59,9 @@ This kind of quantization is nothing exotic — it's the same reason a guitar st
 
 The genuinely striking part is that the same equation reappears with a different meaning in quantum mechanics. The Schrödinger equation for a two-dimensional harmonic oscillator has identical mathematical form — but there, the roles are different: it governs a wavefunction evolving in time, and the integer n labels discrete energy. Our beam equation governs a field's shape evolving in space (z stands in for t), and n labels discrete transverse shapes, not discrete energies — a beam of order n can carry any energy at all; nothing here restricts it. Same math, two completely different physical quantities being quantized, for two completely different physical reasons.
 
-**Figure 2 --- A family of beams.** The Gaussian TEM₀₀ mode is only the
-ground floor. Higher-order Hermite--Gaussian modes form a structured
-family of propagating solutions, with TEM₁₀ and TEM₀₁ as the simplest
-two-lobed examples. Their organization mirrors the mathematics of a
-two-dimensional harmonic oscillator.
-
-## Two Different Beams Can Propagate in Exactly the Same Way
+![Figure 2](../outputs/figure_2_hermite_gaussian_modes.png)
+> Caption: **Figure 2. Gaussian beams come in families. The Hermite–Gaussian modes are labelled by two integers, n and m, which count the transverse structure in the horizontal and vertical directions. The familiar Gaussian beam is simply the lowest member, HG₀₀. Image by author.**
+> Alt text: Four-by-four grid showing the intensity profiles of Hermite–Gaussian laser modes for n and m from 0 to 3. HG00 is a single bright Gaussian spot; increasing n divides the beam into more vertical lobes, while increasing m produces more horizontal lobes.
 
 ## Two Different Beams Can Propagate in Exactly the Same Way
 
@@ -83,12 +79,9 @@ $$\text{HG}_{10} + i\,\text{HG}_{01}$$
 
 — and the result stops looking like a rotated version of anything you started with. The intensity turns into a doughnut, and buried in that combination is a phase that winds smoothly around the dark centre, rather than flipping sign across a node the way every real combination did.
 
-**Figure 3 --- From two lobes to a vortex.** Two degenerate
-Hermite--Gaussian modes, HG₁₀ and HG₀₁, combined with a quarter-cycle
-phase shift form a Laguerre--Gaussian mode. The intensity is a doughnut,
-but the crucial feature is hidden in the phase: it winds by 2π around
-the dark centre. Cylindrical-lens mode converters can perform this HG↔LG
-transformation experimentally.
+![Figure 3](../outputs/figure_3_hg_to_lg.png)
+> Caption: **Figure 3. From two lobes to a vortex. HG₁₀ and HG₀₁ can be combined in different ways. Adding or subtracting them produces the same two-lobed pattern at a rotated angle. Add a quarter-cycle (π/2) phase shift between them instead, and the intensity becomes a doughnut. The two doughnuts look identical here—but their hidden phases wind in opposite directions. Image by author.**
+> Alt text: Six intensity plots arranged in two rows and three columns. The first column shows the perpendicular two-lobed HG10 and HG01 modes. Adding and subtracting them produces diagonally rotated two-lobed patterns. Combining them with positive or negative pi-over-two relative phase produces identical doughnut-shaped intensity patterns with a dark centre.
 
 ## The Doughnut Is Hiding a Twist
 
@@ -145,12 +138,9 @@ So the chain is complete:
 **a stable transverse mode → a winding phase → sideways momentum →
 orbital angular momentum → mechanical rotation.**
 
-**Figure 4 --- The twist becomes mechanical.** A helical optical phase
-gives the beam an azimuthal momentum component and therefore orbital
-angular momentum. When that angular momentum is transferred to matter it
-produces a torque. In the experiment of He *et al.* (1995), absorbing
-particles rotated in a vortex beam, and reversing the beam's handedness
-reversed the rotation.
+![Figure 4](../outputs/figure_4_cylindrical_mode_converter.png)
+> Caption: **Figure 4. Turning lobes into a vortex. A pair of cylindrical lenses converts a Hermite–Gaussian mode, oriented at 45° to the lens axes, into a Laguerre–Gaussian mode. The lenses focus the beam differently along the two transverse directions, introducing the relative phase shift that turns the two-lobed input into a doughnut-shaped output. Image by author.**
+> Alt text: 3D illustration of a laser beam passing through two transparent cylindrical lenses. The input beam has two bright diagonal lobes, while the output has a bright doughnut-shaped intensity profile. The beam narrows asymmetrically between the lenses, illustrating the astigmatic mode conversion.
 
 The surprising part is that none of this required photons yet.
 Everything so far has been classical wave optics.
@@ -161,12 +151,4 @@ quantize the oscillator?
 
 That is where the next post begins.
 
-------------------------------------------------------------------------
 
-### Feature Image
-
-A visually clean three-dimensional Laguerre--Gaussian beam: a bright
-doughnut-like intensity distribution wrapped around a clearly visible
-helical phase/wavefront. No equations or explanatory labels. The image
-should make the beam look as though it is propagating forward while
-secretly twisting around its own axis.
