@@ -104,6 +104,17 @@ Possible pull quote:
 The doughnut is what we see. The twist is in the phase.
 -->
 ```
+## Mode conversion in experiments
+
+
+
+
+
+
+![Figure 4](../outputs/figure_4_cylindrical_mode_converter.png)
+> Caption: **Figure 4. Turning lobes into a vortex. A pair of cylindrical lenses converts a Hermite–Gaussian mode, oriented at 45° to the lens axes, into a Laguerre–Gaussian mode. The lenses focus the beam differently along the two transverse directions, introducing the relative phase shift that turns the two-lobed input into a doughnut-shaped output. Image by author.**
+> Alt text: 3D illustration of a laser beam passing through two transparent cylindrical lenses. The input beam has two bright diagonal lobes, while the output has a bright doughnut-shaped intensity profile. The beam narrows asymmetrically between the lenses, illustrating the astigmatic mode conversion.
+
 ## Some of Light's Momentum Points Sideways
 
 Make the geometry explicit here: a longitudinal momentum component
@@ -137,10 +148,6 @@ So the chain is complete:
 
 **a stable transverse mode → a winding phase → sideways momentum →
 orbital angular momentum → mechanical rotation.**
-
-![Figure 4](../outputs/figure_4_cylindrical_mode_converter.png)
-> Caption: **Figure 4. Turning lobes into a vortex. A pair of cylindrical lenses converts a Hermite–Gaussian mode, oriented at 45° to the lens axes, into a Laguerre–Gaussian mode. The lenses focus the beam differently along the two transverse directions, introducing the relative phase shift that turns the two-lobed input into a doughnut-shaped output. Image by author.**
-> Alt text: 3D illustration of a laser beam passing through two transparent cylindrical lenses. The input beam has two bright diagonal lobes, while the output has a bright doughnut-shaped intensity profile. The beam narrows asymmetrically between the lenses, illustrating the astigmatic mode conversion.
 
 The surprising part is that none of this required photons yet.
 Everything so far has been classical wave optics.
