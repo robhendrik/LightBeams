@@ -151,4 +151,11 @@ quantize the oscillator?
 
 That is where the next post begins.
 
+## Bonus
+![Bonus Figure](../outputs/bonus_higher_order_vortex.png)
+> Caption: **Bonus figure — Building a higher-order vortex. A third-order Laguerre–Gaussian mode can be constructed from four degenerate Hermite–Gaussian modes with carefully chosen amplitudes and phases. Although the resulting LG₀⁺³ intensity is still a simple doughnut, its hidden phase winds three times around the dark centre — a total phase change of 6π.**
+> Alt text: Four third-order Hermite–Gaussian intensity patterns, labelled HG₃₀, i√3 HG₂₁, −√3 HG₁₂, and −i HG₀₃, combine into an LG₀⁺³ mode. The resulting mode has a bright circular ring surrounding a dark centre.
+
+## References
+
 
