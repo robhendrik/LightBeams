@@ -18,7 +18,7 @@ from matplotlib.patches import Circle, FancyArrowPatch
 import numpy as np
 
 
-OUTPUT = Path(__file__).resolve().parents[1] / "outputs" / "figure_5_AOM.png"
+OUTPUT = Path(__file__).resolve().parents[1] / "outputs" / "figure_5_OAM.png"
 DPI = 250
 CMAP = "inferno"
 CYAN = "#6de1ef"
