@@ -144,6 +144,10 @@ transfer orbital angular momentum to matter, producing a torque. In the
 beam carrying a phase singularity rotated; reversing the handedness of
 the optical vortex reversed the direction of rotation.
 
+![Figure 5](../outputs/figure_5_AOM.png)
+> Caption: **Figure 5. A twist with mechanical consequences. A vortex beam carries momentum forward and around its axis. Its azimuthal momentum can transfer angular momentum to a trapped particle; reversing the phase winding reverses the direction of rotation. Image by author.**
+> Alt text: Three transverse views of a doughnut-shaped vortex beam. The first marks forward momentum out of the page and azimuthal momentum around the dark axis. The other two show particles on identical bright rings moving in opposite directions for phase winding numbers +1 and −1.
+
 So the chain is complete:
 
 **a stable transverse mode → a winding phase → sideways momentum →
@@ -164,5 +168,4 @@ That is where the next post begins.
 > Alt text: Four third-order Hermite–Gaussian intensity patterns, labelled HG₃₀, i√3 HG₂₁, −√3 HG₁₂, and −i HG₀₃, combine into an LG₀⁺³ mode. The resulting mode has a bright circular ring surrounding a dark centre.
 
 ## References
-
 
