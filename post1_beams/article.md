@@ -106,10 +106,7 @@ The doughnut is what we see. The twist is in the phase.
 ```
 ## Mode conversion in experiments
 
-
-
-
-
+The conversion does not ony happen on paper, we can add and substract these modes in an experiment. Start with 45 deg, in fact this is hor + ver in the frame of the cylindrical lenzen. Then the focus adds a phase diff, so we get hor + i ver which is a doughnut. This has been experimentally demonstrated (ref Leiden group)
 
 ![Figure 4](../outputs/figure_4_cylindrical_mode_converter.png)
 > Caption: **Figure 4. Turning lobes into a vortex. A pair of cylindrical lenses converts a Hermite–Gaussian mode, oriented at 45° to the lens axes, into a Laguerre–Gaussian mode. The lenses focus the beam differently along the two transverse directions, introducing the relative phase shift that turns the two-lobed input into a doughnut-shaped output. Image by author.**
@@ -132,21 +129,20 @@ spin angular momentum of light.
 The mathematics of a structured wave has acquired a physical
 consequence.
 
-## Light Can Actually Make Matter Rotate
-
-End with the experimental payoff.
-
-If the azimuthal momentum is real, matter should be able to feel it.
-
-That is exactly what experiments demonstrated. A vortex beam can
-transfer orbital angular momentum to matter, producing a torque. In the
-1995 experiment by He and colleagues, absorbing particles trapped in a
-beam carrying a phase singularity rotated; reversing the handedness of
-the optical vortex reversed the direction of rotation.
-
 ![Figure 5](../outputs/figure_5_AOM.png)
 > Caption: **Figure 5. A twist with mechanical consequences. A vortex beam carries momentum forward and around its axis. Its azimuthal momentum can transfer angular momentum to a trapped particle; reversing the phase winding reverses the direction of rotation. Image by author.**
 > Alt text: Three transverse views of a doughnut-shaped vortex beam. The first marks forward momentum out of the page and azimuthal momentum around the dark axis. The other two show particles on identical bright rings moving in opposite directions for phase winding numbers +1 and −1.
+
+## Light Can Actually Make Matter Rotate
+
+So, if these modes carru AOM. in the mode conversion where did it go or come from? It has to be form the conversion system, the lenses! The azimuthal momentum is real, matter should be able to feel it.
+
+First discussed that it should happen for teh mode conversion shown earlier, but no successfull experiment (Beijersbergen?)
+
+Then, in the 1995 experiment by He and colleagues, absorbing particles trapped in a
+beam carrying a phase singularity rotated; reversing the handedness of
+the optical vortex reversed the direction of rotation.
+
 
 So the chain is complete:
 
