@@ -1,10 +1,11 @@
 # Why Doesn't a Laser Beam Lose Its Shape?
 
-### Shine light through an opening of any shape and diffraction smears it into a blob. Laser beams somehow survive intact — and figuring out how leads straight to a surprising twist.
+### Shine Light Through an Opening of Any Shape and Diffraction Smears It Into a Blob. Laser Beams Somehow Survive Intact — and Figuring Out How Leads Straight to a Surprising Twist.
 
 ![Feature_image](../outputs/feature_twisted_light.png)
 > Caption: **A helical wavefront — light with a twist.**
 > Alt text: A monochrome 3D rendering of a helical optical wavefront twisting around the direction of propagation, illustrating the spiral phase structure of light carrying orbital angular momentum.
+> Source: Image by author.
 
 Light seems able to take on any shape you shine it through — a keyhole, a leaf, a nebula. In reality none of those shapes should survive: send light through an opening of any form and diffraction blurs it into a formless smear within metres. Yet a laser beam refuses to do this — its bright spot travels for kilometres and comes out looking almost exactly as it started. How can that be?
 
@@ -32,9 +33,9 @@ and use this shape in the wave equation. We find that it is an exact solution. T
 Which raises the obvious question: is it the only one?
 
 ![Figure 1](../outputs/figure_1_diffraction_vs_gaussian.png)
-
-> Caption: **Figure 1. Not every beam keeps its shape. After 5 m of free-space propagation, a hard-edged circular beam develops diffraction rings, while a Gaussian beam simply broadens while retaining its Gaussian profile. Both beams were propagated using the same angular-spectrum calculation. Image by author.**
+> Caption: **Figure 1. Not every beam keeps its shape. After 5 m of free-space propagation, a hard-edged circular beam develops diffraction rings, while a Gaussian beam simply broadens while retaining its Gaussian profile. Both beams were propagated using the same angular-spectrum calculation.**
 > Alt text: Four-panel comparison of a hard-edged circular beam and a Gaussian beam before and after 5 m of propagation. The circular beam spreads into a broad central spot surrounded by diffraction rings, while the Gaussian beam becomes wider but retains its smooth Gaussian shape.
+> Source: Image by author.
 
 ## Some Shapes Are Made to Propagate
 
@@ -44,13 +45,13 @@ $$
 \xi=\sqrt{2}\,\frac{x}{w(z)},
 $$
 
-and look for solutions with a Gaussian envelope multiplied by a polynomial $H(\xi)$. When we put this form into the paraxial wave equation, the $z$-dependence separates out. What remains is
+and look for solutions with a Gaussian envelope multiplied by a polynomial *H*(ξ). When we put this form into the paraxial wave equation, the *z*-dependence separates out. What remains is
 
 $$
 H''(\xi)-2\xi H'(\xi)+2nH(\xi)=0.
 $$
 
-This is the Hermite equation. Its finite polynomial solutions exist only for non-negative integers $n=0,1,2,\ldots$, giving the Hermite polynomials $H_n(\xi)$. The corresponding one-dimensional modes are
+This is the Hermite equation. Its finite polynomial solutions exist only for non-negative integers *n* = 0, 1, 2, …, giving the Hermite polynomials Hₙ(ξ). The corresponding one-dimensional modes are
 
 $$
 u_n(x,z)\propto
@@ -61,7 +62,7 @@ e^{ikx^2/2R(z)}
 e^{-i\left(n+\tfrac{1}{2}\right)\psi(z)}.
 $$
 
-For $n=0$ we get the ordinary Gaussian. For $n=1,2,3,\ldots$, extra nodes and lobes appear, but the rescaled shape is still preserved during propagation. These are the one-dimensional Hermite–Gaussian modes. The Gaussian is not one special survivor; it is the first member of a whole family.
+For *n* = 0 we get the ordinary Gaussian. For *n* = 1, 2, 3, …, extra nodes and lobes appear, but the rescaled shape is still preserved during propagation. These are the one-dimensional Hermite–Gaussian modes. The Gaussian is not one special survivor; it is the first member of a whole family.
 
 > **All light beams undergo diffraction. But some beams keep their shape while doing so**
 
@@ -72,21 +73,21 @@ However, there is a simple quantum system that follows exactly the same mathemat
 The mathematics is the same, but the physical meaning is different.
 
 ![Figure 2](../outputs/figure_2_hermite_gaussian_modes.png)
-
-> Caption: **Figure 2. Gaussian beams come in families. The Hermite–Gaussian modes are labelled by two integers, n and m, which count the transverse structure in the horizontal and vertical directions. The familiar Gaussian beam is the lowest member, HG₀₀. Image by author.**
+> Caption: **Figure 2. Gaussian beams come in families. The Hermite–Gaussian modes are labelled by two integers, n and m, which count the transverse structure in the horizontal and vertical directions. The familiar Gaussian beam is the lowest member, HG₀₀.**
 > Alt text: Four-by-four grid showing the intensity profiles of Hermite–Gaussian laser modes for n and m from 0 to 3. HG00 is a single bright Gaussian spot; increasing n divides the beam into more vertical lobes, while increasing m produces more horizontal lobes.
+> Source: Image by author.
 
 ## Two Different Beams Can Propagate in Exactly the Same Way
 
-Now consider a field $u(x,y,z)$ that varies in both *x* and *y*. Since the paraxial equation does not mix the two directions, we can solve them separately and multiply the two 1D modes:
+Now consider a field *u*(*x*, *y*, *z*) that varies in both *x* and *y*. Since the paraxial equation does not mix the two directions, we can solve them separately and multiply the two 1D modes:
 
 $$
 u_{n,m}(x,y,z)=u_n(x,z)\,u_m(y,z)
 $$
 
-Its Gouy phase is $(n+m+1)\psi(z)$. Only the sum $n+m$ matters. Two beams with different shapes but the same $n+m$ therefore accumulate the same phase as they propagate, so a fixed combination of them stays fixed.
+Its Gouy phase is (*n* + *m* + 1) *ψ*(*z*). Only the sum *n* + *m* matters. Two beams with different shapes but the same *n* + *m* therefore accumulate the same phase as they propagate, so a fixed combination of them stays fixed.
 
-The simplest example is $n+m=1$: HG₁₀ and HG₀₁, one lobed along *x* and the other along *y*. Adding or subtracting them does not create a new type of beam. It only rotates the same two-lobed pattern by 45°.
+The simplest example is *n* + *m* = 1: HG₁₀ and HG₀₁, one lobed along *x* and the other along *y*. Adding or subtracting them does not create a new type of beam. It only rotates the same two-lobed pattern by 45°.
 
 So far we have only used real coefficients. The result changes if we introduce a quarter-cycle phase difference:
 
@@ -97,20 +98,21 @@ $$
 Now the beam no longer looks like a rotated two-lobed mode. Its intensity becomes a doughnut. More importantly, its phase is different: instead of jumping across a node, it winds smoothly around the dark centre. These vortex modes are usually described as Laguerre–Gaussian (LG) modes; we will simply call them doughnut or vortex beams here.
 
 ![Figure 3](../outputs/figure_3_hg_to_lg.png)
-> Caption: **Figure 3. From two lobes to a vortex. HG₁₀ and HG₀₁ can be combined in different ways. Adding or subtracting them produces the same two-lobed pattern at a rotated angle. Add a quarter-cycle (π/2) phase shift between them instead, and the intensity becomes a doughnut. The two doughnuts look identical here—but their hidden phases wind in opposite directions. Image by author.**
+> Caption: **Figure 3. From two lobes to a vortex. HG₁₀ and HG₀₁ can be combined in different ways. Adding or subtracting them produces the same two-lobed pattern at a rotated angle. Add a quarter-cycle (π/2) phase shift between them instead, and the intensity becomes a doughnut. The two doughnuts look identical here—but their hidden phases wind in opposite directions.**
 > Alt text: Six intensity plots arranged in two rows and three columns. The first column shows the perpendicular two-lobed HG10 and HG01 modes. Adding and subtracting them produces diagonally rotated two-lobed patterns. Combining them with positive or negative pi-over-two relative phase produces identical doughnut-shaped intensity patterns with a dark centre.
+> Source: Image by author.
 
 ## The Doughnut Is Hiding a Twist
 
 The doughnut-shaped intensity is easy to see, but it isn't the interesting part — a ring of light, by itself, is just a shape like any other. The interesting part is hidden in the phase.
 
-Write $\text{HG}_{10} + i\,\text{HG}_{01}$ in polar coordinates, $x = ρ\cosφ$, $y = ρ\sinφ$. Since $\text{HG}_{10}\propto x$ and $\text{HG}_{01}\propto y$ (times the same radial envelope),
+Write HG₁₀ + *i* HG₀₁ in polar coordinates, *x* = *ρ* cos *φ*, *y* = *ρ* sin *φ*. Since HG₁₀ ∝ *x* and HG₀₁ ∝ *y* (times the same radial envelope),
 
 $$\text{HG}_{10} + i\,\text{HG}_{01} \;\propto\; (x+iy)\cdot(\text{envelope}) \;=\; ρ\,e^{iφ}\cdot(\text{envelope})$$
 
-An explicit $e^{iφ}$ falls out. The phase completes a full turn if you walk once around the beam axis (φ goes from 0 to 2π). Follow a surface of constant phase as you also move forward in *z*, and that surface traces a helix around the beam axis. Unlike the real combinations (HG₁₀, HG₀₁), the doughnut has a phase that winds smoothly and continuously around the axis.
+An explicit *e*ⁱφ falls out. The phase completes a full turn if you walk once around the beam axis (φ goes from 0 to 2π). Follow a surface of constant phase as you also move forward in *z*, and that surface traces a helix around the beam axis. Unlike the real combinations (HG₁₀, HG₀₁), the doughnut has a phase that winds smoothly and continuously around the axis.
 
-More generally, higher-order modes can wind ℓ times, with a phase $e^{iℓφ}$ — ℓ = 1 was just the simplest case. The doughnut you see is the shadow this winding casts on the intensity; the winding itself is the real object.
+More generally, higher-order modes can wind ℓ times, with a phase *e*ⁱℓφ — ℓ = 1 was just the simplest case. The doughnut you see is the shadow this winding casts on the intensity; the winding itself is the real object.
 
 > **The doughnut is what we see in the light intensity. The twist is hidden in the phase.**
 
@@ -123,8 +125,9 @@ The lenses focus the beam differently along their two axes, so the horizontal an
 This mode converter was built and demonstrated in 1993 by Beijersbergen and colleagues in Leiden [2]. A diagonally oriented two-lobed beam goes in at one side, and a vortex comes out at the other.
 
 ![Figure 4](../outputs/figure_4_cylindrical_mode_converter.png)
-> Caption: **Figure 4. Turning lobes into a vortex. A pair of cylindrical lenses converts a Hermite–Gaussian mode, oriented at 45° to the lens axes, into a vortex mode. The lenses focus the beam differently along the two transverse directions, introducing the relative phase shift that turns the two-lobed input into a doughnut-shaped output. Image by author.**
+> Caption: **Figure 4. Turning lobes into a vortex. A pair of cylindrical lenses converts a Hermite–Gaussian mode, oriented at 45° to the lens axes, into a vortex mode. The lenses focus the beam differently along the two transverse directions, introducing the relative phase shift that turns the two-lobed input into a doughnut-shaped output.**
 > Alt text: 3D illustration of a laser beam passing through two transparent cylindrical lenses. The input beam has two bright diagonal lobes, while the output has a bright doughnut-shaped intensity profile. The beam narrows asymmetrically between the lenses, illustrating the astigmatic mode conversion.
+> Source: Image by author.
 
 ## Some of Light's Momentum Points Sideways
 
@@ -137,8 +140,9 @@ A vortex beam is special in how this transverse momentum is arranged. It has an 
 The sideways linear momentum still cancels when we add contributions from opposite sides of the beam, so the beam gives no net push to the left or right. The torques, however, point in the same rotational direction and therefore add. That is orbital angular momentum: momentum that circulates around the beam axis rather than pointing only along it.
 
 ![Figure 5](../outputs/figure_5_OAM.png)
-> Caption: **Figure 5. A twist with mechanical consequences. A vortex beam carries momentum forward and around its axis. Its azimuthal momentum can transfer angular momentum to a trapped particle; reversing the phase winding reverses the direction of rotation. Image by author.**
+> Caption: **Figure 5. A twist with mechanical consequences. A vortex beam carries momentum forward and around its axis. Its azimuthal momentum can transfer angular momentum to a trapped particle; reversing the phase winding reverses the direction of rotation.**
 > Alt text: Three transverse views of a doughnut-shaped vortex beam. The first marks forward momentum out of the page and azimuthal momentum around the dark axis. The other two show particles on identical bright rings moving in opposite directions for phase winding numbers +1 and −1.
+> Source: Image by author.
 
 ## Light Can Actually Make Matter Rotate
 
@@ -152,7 +156,7 @@ The experimental demonstration came not much later, from somewhere else. In 1995
 
 > **Orbital angular momentum is not just a theory — a doughnut beam can actually make a particle rotate.**
 
-We started with beam shapes that survive diffraction, and ended with a beam that can transfer angular momentum to matter. And none of it needed a single photon. Our description of structured light so far has been fully classical.Small absorbing particles illuminated by a vortex beam started to rotate. When they reversed the vortex's handedness, the particles reversed their rotation too.
+We started with beam shapes that survive diffraction, and ended with a beam that can transfer angular momentum to matter. And none of it needed a single photon. Our description of structured light so far has been fully classical.
 
 The next question is different: what changes when we actually apply quantum mechanics to the light itself? How do these modes, and this angular momentum, look in a theory where photons rule?
 
@@ -162,6 +166,7 @@ That is where the next post begins.
 ![Bonus Figure](../outputs/bonus_higher_order_vortex.png)
 > Caption: **Bonus figure — Building a higher-order vortex. A third-order vortex can be constructed from four degenerate Hermite–Gaussian modes with carefully chosen amplitudes and phases. Although the resulting intensity is still a simple doughnut, its hidden phase winds three times around the dark centre — a total phase change of 6π.**
 > Alt text: Four third-order Hermite–Gaussian intensity patterns, labelled HG₃₀, i√3 HG₂₁, −√3 HG₁₂, and −i HG₀₃, combine into a higher-order vortex mode. The resulting mode has a bright circular ring surrounding a dark centre.
+> Source: Image by author.
 
 ## References
 
