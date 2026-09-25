@@ -36,6 +36,7 @@ def _metadata(lines: list[str], result: ValidationResult) -> tuple[set[int], set
         return set(range(start, len(lines))), set()
     covered.update(range(start, end + 1))
     topic_lines: set[int] = set()
+    topics_line: int | None = None
     key_line: int | None = None
     current_key: str | None = None
     seen: set[str] = set()
@@ -67,6 +68,7 @@ def _metadata(lines: list[str], result: ValidationResult) -> tuple[set[int], set
         if key not in _KNOWN_METADATA:
             _finding(result, Severity.WARNING, f"Unknown metadata key '{key}' will be ignored.", i + 1)
         if key == "topics":
+            topics_line = i + 1
             result.metadata["topics"] = []
             if value:
                 malformed = True
@@ -80,7 +82,7 @@ def _metadata(lines: list[str], result: ValidationResult) -> tuple[set[int], set
         _finding(result, Severity.ERROR, "Malformed metadata block.", start + 1)
     topics = result.metadata.get("topics", [])
     if len(topics) > 5:
-        _finding(result, Severity.ERROR, "Medium supports at most five topics; choose which to remove.", key_line or start + 1)
+        _finding(result, Severity.ERROR, "Medium supports at most five topics; choose which to remove.", topics_line or start + 1)
     return covered, topic_lines
 
 
@@ -112,6 +114,7 @@ def validate_article(article_path: str | Path) -> ValidationResult:
     title_lines: list[tuple[int, str]] = []
     headings: list[tuple[int, int, str]] = []
     in_display_math = False
+    display_math_start: int | None = None
     definition_ids: dict[str, list[int]] = {}
     references: list[tuple[str, int]] = []
 
@@ -128,10 +131,14 @@ def validate_article(article_path: str | Path) -> ValidationResult:
             if "-->" not in line.split("<!--", 1)[1]:
                 in_html_comment = True
             continue
-        if line.count("$$") % 2:
-            in_display_math = not in_display_math
-        elif "$$" in line and line.count("$$") >= 2:
-            pass
+        delimiter_count = line.count("$$")
+        if delimiter_count % 2:
+            if in_display_math:
+                in_display_math = False
+                display_math_start = None
+            else:
+                in_display_math = True
+                display_math_start = line_no
         if not in_display_math:
             # Remove complete display math on a single line before checking inline dollars.
             check = re.sub(r"\$\$.*?\$\$", "", line)
@@ -171,6 +178,8 @@ def validate_article(article_path: str | Path) -> ValidationResult:
                     _finding(result, Severity.ERROR, "Figure is missing an Alt text: field.", line_no)
             if not any(re.match(r"Source:\s*\S", text, re.I) for text, _ in blocks):
                 _finding(result, Severity.WARNING, "Figure is missing a Source: field.", line_no)
+    if in_display_math:
+        _finding(result, Severity.ERROR, "Unterminated display-math block opened with '$$'.", display_math_start or len(lines))
     if len(title_lines) == 0:
         _finding(result, Severity.FATAL, "Article must contain exactly one level-1 title; none found.", 1)
     elif len(title_lines) > 1:
@@ -179,12 +188,34 @@ def validate_article(article_path: str | Path) -> ValidationResult:
     else:
         result.title = title_lines[0][1]
         pos = title_lines[0][0] + 1
-        while pos < len(lines) and (not lines[pos].strip() or pos in metadata_lines or lines[pos].lstrip().startswith("<!--")):
-            pos += 1
-        if pos < len(lines):
-            candidate = _HEADING.match(lines[pos])
+        while pos < len(lines):
+            if pos in metadata_lines or not lines[pos].strip():
+                pos += 1
+                continue
+            remainder = lines[pos]
+            while "<!--" in remainder:
+                before, comment_tail = remainder.split("<!--", 1)
+                if "-->" in comment_tail:
+                    _, remainder = comment_tail.split("-->", 1)
+                    remainder = before + remainder
+                else:
+                    pos += 1
+                    while pos < len(lines) and "-->" not in lines[pos]:
+                        pos += 1
+                    if pos >= len(lines):
+                        remainder = ""
+                        break
+                    _, remainder = lines[pos].split("-->", 1)
+                    remainder = before + remainder
+            if not remainder.strip():
+                pos += 1
+                continue
+            candidate = _HEADING.match(remainder.strip())
             if candidate and len(candidate.group(1)) == 3:
                 result.subtitle = candidate.group(2)
+            break
+        if result.subtitle is None:
+            _finding(result, Severity.WARNING, "Expected a level-3 subtitle immediately after the title, but none was found.", title_lines[0][0] + 1)
     for footnote_id, ref_line in references:
         if footnote_id not in definition_ids:
             _finding(result, Severity.ERROR, f"Unresolved footnote reference '[^{footnote_id}]'.", ref_line)

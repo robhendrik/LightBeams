@@ -59,6 +59,33 @@ def test_figure_missing_caption_and_alt_and_wrong_alt_spelling(tmp_path):
     assert any("exact spelling" in m for m in messages)
 
 
+def test_figure_missing_alt_text_entirely(tmp_path):
+    result = validate_article(article(tmp_path, "# Title\n\n![x](missing.png)\n> Caption: A caption.\n"))
+    assert any(f.severity is Severity.ERROR and "missing an Alt text" in f.message for f in result.findings)
+
+
+def test_unterminated_display_math_is_error(tmp_path):
+    result = validate_article(article(tmp_path, "# Title\n\n$$\nx^2\n"))
+    assert any(f.severity is Severity.ERROR and "Unterminated display-math" in f.message and f.line == 3 for f in result.findings)
+
+
+def test_multiline_comment_between_title_and_subtitle_is_skipped(tmp_path):
+    result = validate_article(article(tmp_path, "# Title\n\n<!-- A comment\nthat spans multiple lines\nand ends here -->\n\n### Subtitle\n"))
+    assert result.subtitle == "Subtitle"
+    assert not any("Expected a level-3 subtitle" in f.message for f in result.findings)
+
+
+def test_too_many_topics_finding_points_to_topics_key(tmp_path):
+    result = validate_article(article(tmp_path, "# Title\n\n<!-- medium\ntopics:\n  - A\n  - B\n  - C\n  - D\n  - E\n  - F\nseo_title: Later\n-->\n"))
+    finding = next(f for f in result.findings if "at most five topics" in f.message)
+    assert finding.line == 4
+
+
+def test_missing_subtitle_is_warning(tmp_path):
+    result = validate_article(article(tmp_path, "# Title\n\n## Section\n"))
+    assert any(f.severity is Severity.WARNING and "Expected a level-3 subtitle" in f.message for f in result.findings)
+
+
 def test_footnote_validation(tmp_path):
     result = validate_article(article(tmp_path, "# Title\n\nA[^missing] B[^dup].\n\n[^dup]: First\n[^dup]: Second\n[^unused]: Extra\n"))
     messages = [f.message for f in result.findings]
