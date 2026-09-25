@@ -91,139 +91,84 @@ def _get_by_role(page: Any, role: str, name: str, *, exact: bool = True) -> Any:
     return page.get_by_role(role, name=name, exact=exact)
 
 
-def _semantic_editable(page: Any, label: str) -> Any | None:
-    """Find a named editor field through accessible names or semantic attributes."""
-    name = re.compile(re.escape(label), re.IGNORECASE)
-    candidates = [
-        page.get_by_role("textbox", name=name),
-        page.get_by_label(name),
-        page.locator(f'[contenteditable="true"][aria-label*="{label}" i]'),
-        page.locator(f'[contenteditable="true"][data-placeholder*="{label}" i]'),
-    ]
-    return _first_visible(candidates)
-
-
-def _title_editor(page: Any) -> Any:
-    """Discover the title before writing, without touching the next block."""
-    title = _semantic_editable(page, "Title")
-    if title is not None:
-        return title
-
-    editors = page.locator('[contenteditable="true"]')
+def _main_editor(page: Any) -> Any:
+    """Find the single story surface using its semantic contenteditable role."""
+    editor = page.locator('[contenteditable="true"][role="textbox"]')
     try:
-        count = editors.count()
+        count = editor.count()
     except Exception as exc:
-        raise MediumBrowserError(f"Could not inspect Medium contenteditable editor controls: {exc}") from exc
-    if count not in (1, 2):
+        raise MediumBrowserError(f"Could not inspect Medium's main story editor: {exc}") from exc
+    if count != 1:
         raise MediumBrowserError(
-            "Could not identify the Medium title editor: semantic controls were unavailable, "
-            f"and expected 1 or 2 [contenteditable=\"true\"] elements before typing but found {count}."
+            "Could not identify Medium's main story editor: expected exactly one "
+            f'[contenteditable="true"][role="textbox"] element but found {count}.'
         )
-    title_candidate = editors.nth(0)
+    candidate = editor.first
     try:
-        title_role = title_candidate.get_attribute("role")
-    except Exception as exc:
-        raise MediumBrowserError(f"Could not inspect the first Medium title candidate's role attribute: {exc}") from exc
-    if title_role != "textbox":
-        raise MediumBrowserError(
-            "Could not identify the Medium title editor: the first contenteditable "
-            f"[contenteditable=\"true\"] elements has role={title_role!r}, expected 'textbox'."
-        )
-    return title_candidate
-
-
-def _body_editor(page: Any, timeout_ms: int = 15_000) -> Any:
-    """Wait for Medium to create a usable body block after title Enter."""
-    body = _semantic_editable(page, "Tell your story")
-    if body is not None:
-        candidate = body
-    else:
-        editors = page.locator('[contenteditable="true"]')
-        second = editors.nth(1)
-        try:
-            second.wait_for(state="attached", timeout=timeout_ms)
-        except Exception as exc:
-            raise MediumBrowserError(f"The next Medium body editor did not appear after pressing Enter: {exc}") from exc
-        try:
-            count = editors.count()
-        except Exception as exc:
-            raise MediumBrowserError(f"Could not inspect Medium editor blocks after pressing Enter: {exc}") from exc
-        if count != 2:
-            raise MediumBrowserError(
-                "Could not identify the Medium body editor after pressing Enter: "
-                f"expected exactly 2 [contenteditable=\"true\"] elements but found {count}."
-            )
-        title = editors.nth(0)
-        try:
-            title_role = title.get_attribute("role")
-        except Exception as exc:
-            raise MediumBrowserError(f"Could not inspect the first Medium editor's role attribute: {exc}") from exc
-        if title_role != "textbox":
-            raise MediumBrowserError(
-                "Could not identify the Medium body editor: the first contenteditable "
-                f"element has role={title_role!r}, expected 'textbox'."
-            )
-        candidate = second
-    try:
-        candidate.wait_for(state="visible", timeout=timeout_ms)
+        candidate.wait_for(state="visible", timeout=15_000)
         if not candidate.is_editable():
             from playwright.sync_api import expect
 
-            expect(candidate).to_be_editable(timeout=timeout_ms)
+            expect(candidate).to_be_editable(timeout=15_000)
     except Exception as exc:
-        raise MediumBrowserError(f"The next Medium body editor did not become usable: {exc}") from exc
+        raise MediumBrowserError(f"Medium's main story editor is not usable: {exc}") from exc
     return candidate
 
 
 class MediumDraftEditor:
-    """Writes prepared typed blocks into Medium's story editor."""
+    """Writes prepared typed blocks into Medium's single story editor surface."""
 
     def __init__(self, page: Any):
         self.page = page
         self.keyboard = page.keyboard
-        self.title_field: Any | None = None
-        self.body_field: Any | None = None
+        self.editor: Any | None = None
 
     def populate(self, article: Article) -> None:
-        self.title_field = _title_editor(self.page)
-        self.title_field.click()
-        self._type_into_contenteditable(self.title_field, article.title)
+        self.editor = _main_editor(self.page)
+        self.editor.click()
+        self._type_plain_text(article.title)
+        self._wait_for_testid("editorTitleParagraph")
         self.keyboard.press("Enter")
-        self.body_field = _body_editor(self.page)
+        self._wait_for_new_paragraph()
         self.wait_until_saved()
-        self.body_field.click()
         if article.subtitle:
             self._type_plain_text(article.subtitle)
+            self.keyboard.press("Control+Alt+2")
+            self._wait_for_testid("editorSubtitleParagraph")
             self.keyboard.press("Enter")
+            self._wait_for_new_paragraph()
         for block in article.blocks:
             if isinstance(block, Paragraph):
                 self._paragraph(block)
             elif isinstance(block, SectionHeading):
-                self.keyboard.press("Control+Alt+2")
+                self.keyboard.press("Control+Alt+1")
                 self._type_plain_text(block.text)
-                self.keyboard.press("Enter")
+                self._wait_for_testid("editorHeadingText", last=True)
+                self._enter_new_paragraph()
             elif isinstance(block, Figure):
                 self._figure(block)
             elif isinstance(block, DisplayEquation):
                 self._image(block.rendered_path)
-                self.keyboard.press("Enter")
+                self._focus_next_paragraph()
             elif isinstance(block, PullQuote):
                 # Medium's documented quote shortcut toggles from a quote to a
                 # pull-out quote on its second use.
                 self.keyboard.press("Control+Alt+5")
                 self.keyboard.press("Control+Alt+5")
                 self._type_plain_text(block.text)
-                self.keyboard.press("Enter")
+                self._wait_for_testid("editorParagraphText", last=True)
+                self._enter_new_paragraph()
             else:
                 raise MediumBrowserError(f"Unsupported prepared block type: {type(block).__name__}.")
         if article.footnotes:
             if not any(isinstance(block, SectionHeading) and block.text.casefold() == "notes" for block in article.blocks):
-                self.keyboard.press("Control+Alt+2")
+                self.keyboard.press("Control+Alt+1")
                 self._type_plain_text("Notes")
-                self.keyboard.press("Enter")
+                self._wait_for_testid("editorHeadingText", last=True)
+                self._enter_new_paragraph()
             for note in article.footnotes:
                 self._type_plain_text(f"{note.marker} {note.text}")
-                self.keyboard.press("Enter")
+                self._enter_new_paragraph()
 
     def wait_until_saved(self, timeout_ms: int = 30_000) -> None:
         saved = self.page.get_by_text(re.compile(r"\bSaved\b", re.IGNORECASE))
@@ -235,24 +180,25 @@ class MediumDraftEditor:
         except Exception:
             self.keyboard.type(text, delay=15)
 
-    def _type_into_contenteditable(self, field: Any, text: str) -> None:
-        """Enter editable text through keyboard events and verify the title."""
-        needs_fallback = False
+    def _wait_for_testid(self, testid: str, *, index: int | None = None, last: bool = False) -> Any:
+        elements = self.page.get_by_test_id(testid)
+        target = elements.last if last else elements.nth(index) if index is not None else elements.first
         try:
-            self.keyboard.insert_text(text)
-        except Exception:
-            needs_fallback = True
-        else:
-            try:
-                needs_fallback = field.inner_text().strip() != text
-            except Exception:
-                # Some editor locators do not expose rendered text immediately;
-                # successful keyboard insertion remains the preferred path.
-                needs_fallback = False
-        if needs_fallback:
-            field.click()
-            self.keyboard.press("Control+A")
-            self.keyboard.type(text, delay=15)
+            target.wait_for(state="visible", timeout=15_000)
+        except Exception as exc:
+            raise MediumBrowserError(f"Expected Medium editor state '{testid}' did not appear: {exc}") from exc
+        return target
+
+    def _wait_for_new_paragraph(self) -> Any:
+        paragraphs = self.page.get_by_test_id("editorParagraphText")
+        index = paragraphs.count()
+        return self._wait_for_testid("editorParagraphText", index=index)
+
+    def _enter_new_paragraph(self) -> Any:
+        paragraphs = self.page.get_by_test_id("editorParagraphText")
+        index = paragraphs.count()
+        self.keyboard.press("Enter")
+        return self._wait_for_testid("editorParagraphText", index=index)
 
     def _paragraph(self, paragraph: Paragraph) -> None:
         matches = list(_LINK_MARKDOWN.finditer(paragraph.text))
@@ -260,7 +206,7 @@ class MediumDraftEditor:
             self._type_plain_text(paragraph.text)
         else:
             self._type_paragraph_with_links(paragraph.text, paragraph.links, matches)
-        self.keyboard.press("Enter")
+        self._enter_new_paragraph()
 
     def _type_paragraph_with_links(self, text: str, links: list[Link], matches: list[re.Match[str]]) -> None:
         link_index = 0
@@ -325,10 +271,11 @@ class MediumDraftEditor:
             raise MediumBrowserError("Medium's image menu did not expose an accessible Image action.")
         image.click()
 
-    def _image(self, image_path: Path) -> None:
+    def _image(self, image_path: Path) -> Any:
         if not image_path.is_file():
             raise MediumBrowserError(f"Prepared image file does not exist: {image_path}")
-        before = self.page.get_by_role("img").count()
+        figures = self.page.get_by_test_id("editorImageParagraph")
+        before = figures.count()
         try:
             with self.page.expect_file_chooser(timeout=8_000) as chooser_info:
                 self._open_image_picker()
@@ -337,12 +284,16 @@ class MediumDraftEditor:
             raise
         except Exception as exc:
             raise MediumBrowserError(f"Medium image upload control failed for {image_path}: {exc}") from exc
-        images = self.page.get_by_role("img")
-        images.nth(max(before, 0)).wait_for(state="visible", timeout=30_000)
+        figure = figures.nth(before)
+        try:
+            figure.wait_for(state="visible", timeout=30_000)
+        except Exception as exc:
+            raise MediumBrowserError(f"Medium did not create an image figure for {image_path}: {exc}") from exc
+        return figure
 
     def _figure(self, figure: Figure) -> None:
-        self._image(figure.source_path)
-        image = self.page.get_by_role("img").last
+        image_figure = self._image(figure.source_path)
+        image = image_figure.get_by_role("img")
         image.click()
         if figure.alt_text:
             alt_button = _first_visible([_get_by_role(self.page, "button", "Alt text")])
@@ -360,11 +311,28 @@ class MediumDraftEditor:
                     save.click()
                 else:
                     alt_field.press("Enter")
-        caption_parts = [part for part in (figure.caption, f"Source: {figure.source_attribution}" if figure.source_attribution else None) if part]
+        caption_parts = [
+            part
+            for part in (figure.caption, f"Source: {figure.source_attribution}" if figure.source_attribution else None)
+            if part
+        ]
         if caption_parts:
-            self.page.get_by_role("img").last.click()
-            self._type_plain_text(" — ".join(caption_parts))
-        self.keyboard.press("Enter")
+            caption = image_figure.locator("figcaption")
+            try:
+                caption.wait_for(state="visible", timeout=15_000)
+            except Exception as exc:
+                raise MediumBrowserError(f"Medium's image caption control did not appear: {exc}") from exc
+            caption.click()
+            self._type_plain_text(" ".join(caption_parts))
+        self._focus_next_paragraph()
+
+    def _focus_next_paragraph(self) -> None:
+        """Focus Medium's automatically-created paragraph after an image."""
+        paragraph = self._wait_for_testid("editorParagraphText", last=True)
+        try:
+            paragraph.click()
+        except Exception as exc:
+            raise MediumBrowserError(f"Could not focus the paragraph after the inserted image: {exc}") from exc
 
 
 def _is_login_page(page: Any) -> bool:
@@ -403,6 +371,8 @@ def _save_failure_diagnostics(session: BrowserSession, article: Article, error: 
                 role = editor.get_attribute("role")
                 tag = editor.evaluate("element => element.tagName.toLowerCase()")
                 lines.append(f"candidate_{index}: tag={tag}, role={role!r}")
+            main_editors = session.page.locator('[contenteditable="true"][role="textbox"]')
+            lines.append(f"main_story_editor_count: {main_editors.count()}")
         except Exception as diagnostic_error:
             lines.append(f"contenteditable_diagnostics_error: {diagnostic_error}")
         diagnostic_path.write_text("\n".join(lines) + "\n", encoding="utf-8")

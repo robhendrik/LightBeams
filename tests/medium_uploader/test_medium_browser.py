@@ -81,6 +81,9 @@ class ShapeElement:
     def wait_for(self, *, state, timeout):
         self.events.append(("wait_for", self.index, state, timeout))
 
+    def is_visible(self):
+        return True
+
     def get_attribute(self, name):
         return self.role if name == "role" else None
 
@@ -103,9 +106,11 @@ class ShapeCollection:
         return len(self.items)
 
     def nth(self, index):
-        if index == 1 and not self.second_available:
-            raise AssertionError("The body locator was requested before Enter created it")
         return self.items[index]
+
+    @property
+    def first(self):
+        return self.items[0]
 
 
 class EmptyLocator:
@@ -126,6 +131,7 @@ class ObservedEditorPage(FakePage):
         super().__init__()
         self.events = []
         self.editors = ShapeCollection([ShapeElement(role, self.events, index) for index, role in enumerate(roles)])
+        self.selectors = []
         self.keyboard = type("Keyboard", (), {
             "insert_text": lambda _, text: self.events.append(("text", text)),
             "press": lambda _, key: self.events.append(("key", key)),
@@ -135,7 +141,8 @@ class ObservedEditorPage(FakePage):
         return EmptyLocator()
 
     def locator(self, selector):
-        if selector == '[contenteditable="true"]':
+        self.selectors.append(selector)
+        if selector in {'[contenteditable="true"]', '[contenteditable="true"][role="textbox"]'}:
             return self.editors
         return EmptyLocator()
 
@@ -175,52 +182,240 @@ def test_profile_is_portable_and_next_to_the_article(tmp_path):
     assert "workspaces" not in str(profile).lower()
 
 
-def test_exact_live_dom_shape_uses_first_contenteditable_for_title_and_second_for_body(tmp_path, monkeypatch):
-    article = prepared_article(tmp_path)
-    page = ObservedEditorPage(["textbox", None])
-    monkeypatch.setattr(medium_browser.MediumDraftEditor, "wait_until_saved", lambda self: page.events.append(("saved",)))
-    medium_browser.MediumDraftEditor(page).populate(article)
-    assert ("text", "A Draft") in page.events
-    assert ("click", 1) in page.events
-    assert ("text", "A short subtitle") in page.events
-    assert page.events.index(("text", "A Draft")) < page.events.index(("key", "Enter"))
-    assert page.events.index(("key", "Enter")) < page.events.index(("wait_for", 1, "attached", 15_000))
-    assert page.events.index(("wait_for", 1, "attached", 15_000)) < page.events.index(("saved",)) < page.events.index(("click", 1))
+def test_main_editor_uses_single_semantic_story_surface():
+    page = ObservedEditorPage(["textbox"])
+    assert medium_browser._main_editor(page) is page.editors.first
+    assert page.selectors == ['[contenteditable="true"][role="textbox"]']
 
 
 @pytest.mark.parametrize(
     ("roles", "message"),
     [
-        ([None, None], "expected 'textbox'"),
-        (["textbox", None, None], "expected 1 or 2"),
+        ([], "expected exactly one"),
+        (["textbox", "textbox"], "expected exactly one"),
     ],
 )
-def test_title_fallback_rejects_ambiguous_dom(roles, message):
+def test_main_editor_rejects_ambiguous_dom(roles, message):
     with pytest.raises(medium_browser.MediumBrowserError, match=message):
-        medium_browser._title_editor(ObservedEditorPage(roles))
+        medium_browser._main_editor(ObservedEditorPage(roles))
 
 
-def test_single_initial_contenteditable_is_accepted_as_title_before_enter():
+def test_single_initial_contenteditable_is_accepted_as_story_editor():
     page = ObservedEditorPage(["textbox"])
-    assert medium_browser._title_editor(page) is page.editors.nth(0)
+    assert medium_browser._main_editor(page) is page.editors.nth(0)
 
 
-def test_body_locator_is_discovered_only_after_enter_creates_it(tmp_path, monkeypatch):
+def test_title_enters_next_block_before_subtitle_without_clicking_second_editor(tmp_path, monkeypatch):
     article = prepared_article(tmp_path)
-    page = DelayedBodyPage()
+    page = ObservedEditorPage(["textbox"])
+    page.get_by_test_id = lambda testid: FakeTestIdCollection(page.events, testid)
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "wait_until_saved", lambda self: page.events.append(("saved",)))
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "_wait_for_new_paragraph", lambda self: page.events.append(("next_block_ready",)))
+    article.blocks = []
     medium_browser.MediumDraftEditor(page).populate(article)
+    assert page.events.index(("click", 0)) < page.events.index(("text", "A Draft"))
     enter_index = page.events.index(("key", "Enter"))
-    body_wait_index = page.events.index(("wait_for", 1, "attached", 15_000))
-    body_click_index = page.events.index(("click", 1))
-    assert enter_index < body_wait_index < page.events.index(("saved",)) < body_click_index
+    ready_index = page.events.index(("next_block_ready",))
+    assert enter_index < ready_index < page.events.index(("saved",))
+    assert page.events.index(("text", "A short subtitle")) > ready_index
+    assert ("key", "Control+Alt+2") in page.events
+    assert page.events.count(("click", 0)) == 1
+
+
+class FakeTestIdCollection:
+    def __init__(self, events, testid):
+        self.events = events
+        self.testid = testid
+
+    @property
+    def first(self):
+        return self
+
+    @property
+    def last(self):
+        return self
+
+    def nth(self, index):
+        return self
+
+    def count(self):
+        return 1
+
+    def wait_for(self, *, state, timeout):
+        self.events.append(("testid_wait", self.testid, state, timeout))
+
+
+def test_subtitle_is_formatted_after_keyboard_insertion(tmp_path, monkeypatch):
+    article = prepared_article(tmp_path)
+    article.blocks = []
+    page = ObservedEditorPage(["textbox"])
+    page.get_by_test_id = lambda testid: FakeTestIdCollection(page.events, testid)
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "wait_until_saved", lambda self: None)
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "_wait_for_new_paragraph", lambda self: None)
+    medium_browser.MediumDraftEditor(page).populate(article)
+    subtitle = page.events.index(("text", "A short subtitle"))
+    styled = page.events.index(("key", "Control+Alt+2"))
+    verified = page.events.index(("testid_wait", "editorSubtitleParagraph", "visible", 15_000))
+    assert subtitle < styled < verified
+
+
+def test_paragraph_uses_keyboard_text_and_enter(monkeypatch):
+    events = []
+
+    class Keyboard:
+        def insert_text(self, text):
+            events.append(("text", text))
+
+        def press(self, key):
+            events.append(("key", key))
+
+    editor = medium_browser.MediumDraftEditor(type("Page", (), {"keyboard": Keyboard()})())
+    monkeypatch.setattr(editor, "_enter_new_paragraph", lambda: events.append(("next",)))
+    editor._paragraph(Paragraph("Body text"))
+    assert events == [("text", "Body text"), ("next",)]
+
+
+def test_heading_and_pull_quote_use_medium_format_shortcuts(tmp_path, monkeypatch):
+    article = prepared_article(tmp_path)
+    article.blocks = [SectionHeading("Heading"), PullQuote("Quote")]
+    events = []
+
+    class Keyboard:
+        def insert_text(self, text):
+            events.append(("text", text))
+
+        def press(self, key):
+            events.append(("key", key))
+
+    class Story:
+        def click(self):
+            events.append(("focus_story",))
+
+    page = type("Page", (), {"keyboard": Keyboard()})()
+    monkeypatch.setattr(medium_browser, "_main_editor", lambda _page: Story())
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "_wait_for_testid", lambda self, testid, **kwargs: events.append(("state", testid)))
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "_wait_for_new_paragraph", lambda self: None)
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "_enter_new_paragraph", lambda self: None)
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "wait_until_saved", lambda self: None)
+    article.subtitle = ""
+    medium_browser.MediumDraftEditor(page).populate(article)
+    assert events.count(("key", "Control+Alt+1")) == 1
+    assert events.count(("key", "Control+Alt+5")) == 2
+    assert ("state", "editorHeadingText") in events
+    assert ("state", "editorParagraphText") in events
+
+
+def test_figure_uses_alt_settings_and_combines_caption_with_source(tmp_path, monkeypatch):
+    events = []
+
+    class VisibleControl:
+        def __init__(self, label):
+            self.label = label
+
+        @property
+        def first(self):
+            return self
+
+        def count(self):
+            return 1
+
+        def is_visible(self):
+            return True
+
+        def click(self):
+            events.append(("click", self.label))
+
+        def fill(self, text):
+            events.append(("fill", self.label, text))
+
+        def press(self, key):
+            events.append(("press", self.label, key))
+
+        def wait_for(self, **kwargs):
+            events.append(("wait", self.label, kwargs["state"]))
+
+    class ImageFigure:
+        def get_by_role(self, role):
+            assert role == "img"
+            return VisibleControl("image")
+
+        def locator(self, selector):
+            assert selector == "figcaption"
+            return VisibleControl("caption")
+
+    class Page:
+        keyboard = type("Keyboard", (), {"insert_text": lambda self, text: events.append(("text", text))})()
+
+        def get_by_role(self, role, name, **kwargs):
+            return VisibleControl(str(name))
+
+        def get_by_label(self, name):
+            return VisibleControl(str(name))
+
+    editor = medium_browser.MediumDraftEditor(Page())
+    monkeypatch.setattr(editor, "_image", lambda path: ImageFigure())
+    monkeypatch.setattr(editor, "_focus_next_paragraph", lambda: events.append(("focus_next",)))
+    editor._figure(Figure("image", tmp_path / "image.png", "A caption.", "Helpful alt text", "Image by author"))
+    assert ("fill", "re.compile('alt text', re.IGNORECASE)", "Helpful alt text") in events
+    assert ("text", "A caption. Source: Image by author") in events
+    assert ("focus_next",) in events
+
+
+def test_image_insertion_waits_for_medium_figure_and_uploads_file(tmp_path, monkeypatch):
+    events = []
+    image = tmp_path / "equation_001.png"
+    image.write_bytes(b"png")
+
+    class FigureLocator:
+        def wait_for(self, **kwargs):
+            events.append(("figure_wait", kwargs["state"]))
+
+    class Figures:
+        def count(self):
+            return 0
+
+        def nth(self, index):
+            assert index == 0
+            return FigureLocator()
+
+    class Chooser:
+        def set_files(self, path):
+            events.append(("file", path))
+
+    class ChooserExpectation:
+        value = Chooser()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+    class Page:
+        keyboard = object()
+
+        def get_by_test_id(self, testid):
+            assert testid == "editorImageParagraph"
+            return Figures()
+
+        def expect_file_chooser(self, **kwargs):
+            events.append(("chooser_wait", kwargs["timeout"]))
+            return ChooserExpectation()
+
+    editor = medium_browser.MediumDraftEditor(Page())
+    monkeypatch.setattr(editor, "_open_image_picker", lambda: events.append(("open_picker",)))
+    editor._image(image)
+    assert events == [
+        ("chooser_wait", 8_000), ("open_picker",), ("file", str(image)),
+        ("figure_wait", "visible"),
+    ]
 
 
 def test_failed_editor_discovery_saves_screenshot_and_diagnostics(tmp_path):
     article = prepared_article(tmp_path)
     page = ObservedEditorPage([None, None])
     session = FakeSession(page)
-    with pytest.raises(medium_browser.MediumBrowserError, match="expected 'textbox'"):
+    with pytest.raises(medium_browser.MediumBrowserError, match="expected exactly one"):
         medium_browser.upload_article(article, session_factory=lambda _: session)
     failure_dir = article.build_dir / "browser_failures"
     assert list(failure_dir.glob("*.png"))
@@ -322,12 +517,15 @@ def test_writer_dispatches_prepared_blocks_in_document_order(tmp_path, monkeypat
         def inner_text(self):
             raise RuntimeError("mock does not expose rendered text")
 
-    monkeypatch.setattr(medium_browser, "_title_editor", lambda page: Field("Title"))
-    monkeypatch.setattr(medium_browser, "_body_editor", lambda page: (events.append(("body_discovered",)) or Field("Body")))
+    monkeypatch.setattr(medium_browser, "_main_editor", lambda page: Field("Story"))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "wait_until_saved", lambda self: events.append(("saved",)))
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "_wait_for_testid", lambda self, testid, **kwargs: events.append(("state", testid)))
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "_wait_for_new_paragraph", lambda self: events.append(("next_paragraph",)))
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "_enter_new_paragraph", lambda self: events.append(("enter_paragraph",)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_paragraph", lambda self, block: events.append(("paragraph", block.text)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_figure", lambda self, block: events.append(("figure", block.caption)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_image", lambda self, path: events.append(("equation", path.name)))
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "_focus_next_paragraph", lambda self: events.append(("focus_next",)))
 
     medium_browser.MediumDraftEditor(Page()).populate(article)
     important = [event for event in events if event[0] in {"paragraph", "figure", "equation", "text", "saved"}]
@@ -345,36 +543,21 @@ def test_writer_dispatches_prepared_blocks_in_document_order(tmp_path, monkeypat
     ]
 
 
-def test_title_falls_back_to_keyboard_type_when_insert_text_does_not_update_field():
+def test_keyboard_input_falls_back_to_type_when_insert_text_fails():
     events = []
 
     class Keyboard:
         def insert_text(self, text):
             events.append(("insert_text", text))
-
-        def press(self, key):
-            events.append(("press", key))
+            raise RuntimeError("insert_text unavailable")
 
         def type(self, text, *, delay):
             events.append(("type", text, delay))
 
-    class Field:
-        def __init__(self):
-            self.clicks = 0
-
-        def click(self):
-            self.clicks += 1
-            events.append(("click",))
-
-        def inner_text(self):
-            return ""
-
     editor = medium_browser.MediumDraftEditor(type("Page", (), {"keyboard": Keyboard()})())
-    editor._type_into_contenteditable(Field(), "Title")
+    editor._type_plain_text("Title")
     assert events == [
         ("insert_text", "Title"),
-        ("click",),
-        ("press", "Control+A"),
         ("type", "Title", 15),
     ]
 
