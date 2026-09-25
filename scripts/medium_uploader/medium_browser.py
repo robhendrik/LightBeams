@@ -103,34 +103,76 @@ def _semantic_editable(page: Any, label: str) -> Any | None:
     return _first_visible(candidates)
 
 
-def _editor_fields(page: Any) -> tuple[Any, Any]:
-    """Discover title/body controls semantically, then use the observed DOM shape."""
+def _title_editor(page: Any) -> Any:
+    """Discover the title before writing, without touching the next block."""
     title = _semantic_editable(page, "Title")
-    body = _semantic_editable(page, "Tell your story")
-    if title is not None and body is not None:
-        return title, body
+    if title is not None:
+        return title
 
     editors = page.locator('[contenteditable="true"]')
     try:
         count = editors.count()
     except Exception as exc:
         raise MediumBrowserError(f"Could not inspect Medium contenteditable editor controls: {exc}") from exc
-    if count != 2:
+    if count not in (1, 2):
         raise MediumBrowserError(
-            "Could not identify Medium title and body editors: semantic controls were unavailable, "
-            f"and expected exactly 2 [contenteditable=\"true\"] elements but found {count}."
+            "Could not identify the Medium title editor: semantic controls were unavailable, "
+            f"and expected 1 or 2 [contenteditable=\"true\"] elements before typing but found {count}."
         )
-    title_candidate, body_candidate = editors.nth(0), editors.nth(1)
+    title_candidate = editors.nth(0)
     try:
         title_role = title_candidate.get_attribute("role")
     except Exception as exc:
-        raise MediumBrowserError(f"Could not inspect the first Medium editor's role attribute: {exc}") from exc
+        raise MediumBrowserError(f"Could not inspect the first Medium title candidate's role attribute: {exc}") from exc
     if title_role != "textbox":
         raise MediumBrowserError(
-            "Could not identify Medium title and body editors: the first of exactly two "
+            "Could not identify the Medium title editor: the first contenteditable "
             f"[contenteditable=\"true\"] elements has role={title_role!r}, expected 'textbox'."
         )
-    return title_candidate, body_candidate
+    return title_candidate
+
+
+def _body_editor(page: Any, timeout_ms: int = 15_000) -> Any:
+    """Wait for Medium to create a usable body block after title Enter."""
+    body = _semantic_editable(page, "Tell your story")
+    if body is not None:
+        candidate = body
+    else:
+        editors = page.locator('[contenteditable="true"]')
+        second = editors.nth(1)
+        try:
+            second.wait_for(state="attached", timeout=timeout_ms)
+        except Exception as exc:
+            raise MediumBrowserError(f"The next Medium body editor did not appear after pressing Enter: {exc}") from exc
+        try:
+            count = editors.count()
+        except Exception as exc:
+            raise MediumBrowserError(f"Could not inspect Medium editor blocks after pressing Enter: {exc}") from exc
+        if count != 2:
+            raise MediumBrowserError(
+                "Could not identify the Medium body editor after pressing Enter: "
+                f"expected exactly 2 [contenteditable=\"true\"] elements but found {count}."
+            )
+        title = editors.nth(0)
+        try:
+            title_role = title.get_attribute("role")
+        except Exception as exc:
+            raise MediumBrowserError(f"Could not inspect the first Medium editor's role attribute: {exc}") from exc
+        if title_role != "textbox":
+            raise MediumBrowserError(
+                "Could not identify the Medium body editor: the first contenteditable "
+                f"element has role={title_role!r}, expected 'textbox'."
+            )
+        candidate = second
+    try:
+        candidate.wait_for(state="visible", timeout=timeout_ms)
+        if not candidate.is_editable():
+            from playwright.sync_api import expect
+
+            expect(candidate).to_be_editable(timeout=timeout_ms)
+    except Exception as exc:
+        raise MediumBrowserError(f"The next Medium body editor did not become usable: {exc}") from exc
+    return candidate
 
 
 class MediumDraftEditor:
@@ -143,9 +185,11 @@ class MediumDraftEditor:
         self.body_field: Any | None = None
 
     def populate(self, article: Article) -> None:
-        self.title_field, self.body_field = _editor_fields(self.page)
+        self.title_field = _title_editor(self.page)
         self.title_field.click()
         self._type_into_contenteditable(self.title_field, article.title)
+        self.keyboard.press("Enter")
+        self.body_field = _body_editor(self.page)
         self.wait_until_saved()
         self.body_field.click()
         if article.subtitle:

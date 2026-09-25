@@ -75,6 +75,12 @@ class ShapeElement:
     def is_visible(self):
         return True
 
+    def is_editable(self):
+        return True
+
+    def wait_for(self, *, state, timeout):
+        self.events.append(("wait_for", self.index, state, timeout))
+
     def get_attribute(self, name):
         return self.role if name == "role" else None
 
@@ -91,11 +97,14 @@ class ShapeElement:
 class ShapeCollection:
     def __init__(self, items):
         self.items = items
+        self.second_available = len(items) > 1
 
     def count(self):
         return len(self.items)
 
     def nth(self, index):
+        if index == 1 and not self.second_available:
+            raise AssertionError("The body locator was requested before Enter created it")
         return self.items[index]
 
 
@@ -131,6 +140,22 @@ class ObservedEditorPage(FakePage):
         return EmptyLocator()
 
 
+class DelayedBodyPage(ObservedEditorPage):
+    def __init__(self):
+        super().__init__(["textbox"])
+
+        class Keyboard:
+            def insert_text(inner_self, text):
+                self.events.append(("text", text))
+
+            def press(inner_self, key):
+                self.events.append(("key", key))
+                if key == "Enter" and len(self.editors.items) == 1:
+                    self.editors.items.append(ShapeElement(None, self.events, 1))
+                    self.editors.second_available = True
+
+        self.keyboard = Keyboard()
+
 class FakeSession:
     def __init__(self, page):
         self.page = page
@@ -158,20 +183,37 @@ def test_exact_live_dom_shape_uses_first_contenteditable_for_title_and_second_fo
     assert ("text", "A Draft") in page.events
     assert ("click", 1) in page.events
     assert ("text", "A short subtitle") in page.events
-    assert page.events.index(("text", "A Draft")) < page.events.index(("saved",)) < page.events.index(("click", 1))
+    assert page.events.index(("text", "A Draft")) < page.events.index(("key", "Enter"))
+    assert page.events.index(("key", "Enter")) < page.events.index(("wait_for", 1, "attached", 15_000))
+    assert page.events.index(("wait_for", 1, "attached", 15_000)) < page.events.index(("saved",)) < page.events.index(("click", 1))
 
 
 @pytest.mark.parametrize(
     ("roles", "message"),
     [
-        (["textbox"], "expected exactly 2"),
         ([None, None], "expected 'textbox'"),
-        (["textbox", None, None], "expected exactly 2"),
+        (["textbox", None, None], "expected 1 or 2"),
     ],
 )
-def test_contenteditable_fallback_rejects_ambiguous_dom(roles, message):
+def test_title_fallback_rejects_ambiguous_dom(roles, message):
     with pytest.raises(medium_browser.MediumBrowserError, match=message):
-        medium_browser._editor_fields(ObservedEditorPage(roles))
+        medium_browser._title_editor(ObservedEditorPage(roles))
+
+
+def test_single_initial_contenteditable_is_accepted_as_title_before_enter():
+    page = ObservedEditorPage(["textbox"])
+    assert medium_browser._title_editor(page) is page.editors.nth(0)
+
+
+def test_body_locator_is_discovered_only_after_enter_creates_it(tmp_path, monkeypatch):
+    article = prepared_article(tmp_path)
+    page = DelayedBodyPage()
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "wait_until_saved", lambda self: page.events.append(("saved",)))
+    medium_browser.MediumDraftEditor(page).populate(article)
+    enter_index = page.events.index(("key", "Enter"))
+    body_wait_index = page.events.index(("wait_for", 1, "attached", 15_000))
+    body_click_index = page.events.index(("click", 1))
+    assert enter_index < body_wait_index < page.events.index(("saved",)) < body_click_index
 
 
 def test_failed_editor_discovery_saves_screenshot_and_diagnostics(tmp_path):
@@ -280,7 +322,8 @@ def test_writer_dispatches_prepared_blocks_in_document_order(tmp_path, monkeypat
         def inner_text(self):
             raise RuntimeError("mock does not expose rendered text")
 
-    monkeypatch.setattr(medium_browser, "_editor_fields", lambda page: (Field("Title"), Field("Body")))
+    monkeypatch.setattr(medium_browser, "_title_editor", lambda page: Field("Title"))
+    monkeypatch.setattr(medium_browser, "_body_editor", lambda page: (events.append(("body_discovered",)) or Field("Body")))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "wait_until_saved", lambda self: events.append(("saved",)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_paragraph", lambda self, block: events.append(("paragraph", block.text)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_figure", lambda self, block: events.append(("figure", block.caption)))
