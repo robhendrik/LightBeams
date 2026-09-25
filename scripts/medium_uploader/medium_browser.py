@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterable
+from urllib.parse import urlsplit
 
 from .models import Article, DisplayEquation, Figure, Footnote, Link, Paragraph, PullQuote, SectionHeading
 
@@ -90,7 +91,7 @@ def _get_by_role(page: Any, role: str, name: str, *, exact: bool = True) -> Any:
     return page.get_by_role(role, name=name, exact=exact)
 
 
-def _editable(page: Any, label: str) -> Any:
+def _semantic_editable(page: Any, label: str) -> Any | None:
     """Find a named editor field through accessible names or semantic attributes."""
     name = re.compile(re.escape(label), re.IGNORECASE)
     candidates = [
@@ -99,10 +100,37 @@ def _editable(page: Any, label: str) -> Any:
         page.locator(f'[contenteditable="true"][aria-label*="{label}" i]'),
         page.locator(f'[contenteditable="true"][data-placeholder*="{label}" i]'),
     ]
-    locator = _first_visible(candidates)
-    if locator is not None:
-        return locator
-    raise MediumBrowserError(f"Could not find the Medium {label.lower()} editor control.")
+    return _first_visible(candidates)
+
+
+def _editor_fields(page: Any) -> tuple[Any, Any]:
+    """Discover title/body controls semantically, then use the observed DOM shape."""
+    title = _semantic_editable(page, "Title")
+    body = _semantic_editable(page, "Tell your story")
+    if title is not None and body is not None:
+        return title, body
+
+    editors = page.locator('[contenteditable="true"]')
+    try:
+        count = editors.count()
+    except Exception as exc:
+        raise MediumBrowserError(f"Could not inspect Medium contenteditable editor controls: {exc}") from exc
+    if count != 2:
+        raise MediumBrowserError(
+            "Could not identify Medium title and body editors: semantic controls were unavailable, "
+            f"and expected exactly 2 [contenteditable=\"true\"] elements but found {count}."
+        )
+    title_candidate, body_candidate = editors.nth(0), editors.nth(1)
+    try:
+        title_role = title_candidate.get_attribute("role")
+    except Exception as exc:
+        raise MediumBrowserError(f"Could not inspect the first Medium editor's role attribute: {exc}") from exc
+    if title_role != "textbox":
+        raise MediumBrowserError(
+            "Could not identify Medium title and body editors: the first of exactly two "
+            f"[contenteditable=\"true\"] elements has role={title_role!r}, expected 'textbox'."
+        )
+    return title_candidate, body_candidate
 
 
 class MediumDraftEditor:
@@ -115,8 +143,7 @@ class MediumDraftEditor:
         self.body_field: Any | None = None
 
     def populate(self, article: Article) -> None:
-        self.title_field = _editable(self.page, "Title")
-        self.body_field = _editable(self.page, "Tell your story")
+        self.title_field, self.body_field = _editor_fields(self.page)
         self.title_field.fill(article.title)
         self.body_field.click()
         if article.subtitle:
@@ -290,6 +317,40 @@ def _save_failure_screenshot(session: BrowserSession, article: Article) -> Path 
         return None
 
 
+def _save_failure_diagnostics(session: BrowserSession, article: Article, error: Exception) -> Path | None:
+    """Save safe editor-discovery diagnostics without URL query data."""
+    try:
+        screenshot_dir = article.build_dir / "browser_failures"
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        diagnostic_path = screenshot_dir / f"medium_failure_{timestamp}.txt"
+        url = urlsplit(getattr(session.page, "url", ""))
+        lines = [f"Failure: {error}", f"Page: {url.scheme}://{url.netloc}{url.path}"]
+        try:
+            editors = session.page.locator('[contenteditable="true"]')
+            count = editors.count()
+            lines.append(f'contenteditable_count: {count}')
+            for index in range(min(count, 10)):
+                editor = editors.nth(index)
+                role = editor.get_attribute("role")
+                tag = editor.evaluate("element => element.tagName.toLowerCase()")
+                lines.append(f"candidate_{index}: tag={tag}, role={role!r}")
+        except Exception as diagnostic_error:
+            lines.append(f"contenteditable_diagnostics_error: {diagnostic_error}")
+        diagnostic_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return diagnostic_path
+    except Exception:
+        return None
+
+
+def _record_failure(session: BrowserSession, article: Article, error: Exception | str) -> str:
+    screenshot = _save_failure_screenshot(session, article)
+    diagnostics = _save_failure_diagnostics(session, article, error)
+    artifacts = [f"Screenshot: {screenshot}" if screenshot else None, f"Diagnostics: {diagnostics}" if diagnostics else None]
+    suffix = "; ".join(item for item in artifacts if item)
+    return f"{error}. {suffix}" if suffix else str(error)
+
+
 def upload_article(
     article: Article,
     *,
@@ -316,19 +377,12 @@ def upload_article(
         return session
     except MediumLoginRequired as exc:
         exc.session = session
-        screenshot = _save_failure_screenshot(session, article)
-        if screenshot:
-            exc.args = (f"{exc}. Screenshot: {screenshot}",)
+        exc.args = (_record_failure(session, article, exc),)
         raise
     except MediumBrowserError as exc:
         exc.session = session
-        screenshot = _save_failure_screenshot(session, article)
-        if screenshot:
-            exc.args = (f"{exc}. Screenshot: {screenshot}",)
+        exc.args = (_record_failure(session, article, exc),)
         raise
     except Exception as exc:
-        screenshot = _save_failure_screenshot(session, article)
-        detail = f"Medium draft creation failed: {exc}"
-        if screenshot:
-            detail += f". Screenshot: {screenshot}"
+        detail = _record_failure(session, article, f"Medium draft creation failed: {exc}")
         raise MediumBrowserError(detail, session=session) from exc

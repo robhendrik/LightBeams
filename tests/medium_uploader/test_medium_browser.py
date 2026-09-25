@@ -62,6 +62,75 @@ class FakePage:
         self.screenshots.append(target)
 
 
+class ShapeElement:
+    def __init__(self, role, events, index):
+        self.role = role
+        self.events = events
+        self.index = index
+        self.first = self
+
+    def count(self):
+        return 1
+
+    def is_visible(self):
+        return True
+
+    def get_attribute(self, name):
+        return self.role if name == "role" else None
+
+    def evaluate(self, _expression):
+        return "div"
+
+    def fill(self, text):
+        self.events.append(("fill", self.index, text))
+
+    def click(self):
+        self.events.append(("click", self.index))
+
+
+class ShapeCollection:
+    def __init__(self, items):
+        self.items = items
+
+    def count(self):
+        return len(self.items)
+
+    def nth(self, index):
+        return self.items[index]
+
+
+class EmptyLocator:
+    first = None
+
+    def __init__(self):
+        self.first = self
+
+    def count(self):
+        return 0
+
+    def is_visible(self):
+        return False
+
+
+class ObservedEditorPage(FakePage):
+    def __init__(self, roles):
+        super().__init__()
+        self.events = []
+        self.editors = ShapeCollection([ShapeElement(role, self.events, index) for index, role in enumerate(roles)])
+        self.keyboard = type("Keyboard", (), {
+            "insert_text": lambda _, text: self.events.append(("text", text)),
+            "press": lambda _, key: self.events.append(("key", key)),
+        })()
+
+    def get_by_label(self, *args, **kwargs):
+        return EmptyLocator()
+
+    def locator(self, selector):
+        if selector == '[contenteditable="true"]':
+            return self.editors
+        return EmptyLocator()
+
+
 class FakeSession:
     def __init__(self, page):
         self.page = page
@@ -79,6 +148,43 @@ def test_profile_is_portable_and_next_to_the_article(tmp_path):
     profile = medium_browser.profile_directory(article.source_path)
     assert profile == article.source_path.parent / ".medium_browser_profile"
     assert "workspaces" not in str(profile).lower()
+
+
+def test_exact_live_dom_shape_uses_first_contenteditable_for_title_and_second_for_body(tmp_path):
+    article = prepared_article(tmp_path)
+    page = ObservedEditorPage(["textbox", None])
+    medium_browser.MediumDraftEditor(page).populate(article)
+    assert ("fill", 0, "A Draft") in page.events
+    assert ("click", 1) in page.events
+    assert ("text", "A short subtitle") in page.events
+
+
+@pytest.mark.parametrize(
+    ("roles", "message"),
+    [
+        (["textbox"], "expected exactly 2"),
+        ([None, None], "expected 'textbox'"),
+        (["textbox", None, None], "expected exactly 2"),
+    ],
+)
+def test_contenteditable_fallback_rejects_ambiguous_dom(roles, message):
+    with pytest.raises(medium_browser.MediumBrowserError, match=message):
+        medium_browser._editor_fields(ObservedEditorPage(roles))
+
+
+def test_failed_editor_discovery_saves_screenshot_and_diagnostics(tmp_path):
+    article = prepared_article(tmp_path)
+    page = ObservedEditorPage([None, None])
+    session = FakeSession(page)
+    with pytest.raises(medium_browser.MediumBrowserError, match="expected 'textbox'"):
+        medium_browser.upload_article(article, session_factory=lambda _: session)
+    failure_dir = article.build_dir / "browser_failures"
+    assert list(failure_dir.glob("*.png"))
+    diagnostics = list(failure_dir.glob("*.txt"))
+    assert diagnostics
+    report = diagnostics[0].read_text(encoding="utf-8")
+    assert "contenteditable_count: 2" in report
+    assert "candidate_0: tag=div, role=None" in report
 
 
 def test_launch_uses_persistent_profile_and_headed_browser(tmp_path):
@@ -166,7 +272,7 @@ def test_writer_dispatches_prepared_blocks_in_document_order(tmp_path, monkeypat
         def click(self):
             events.append(("click", self.label))
 
-    monkeypatch.setattr(medium_browser, "_editable", lambda page, label: Field(label))
+    monkeypatch.setattr(medium_browser, "_editor_fields", lambda page: (Field("Title"), Field("Body")))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_paragraph", lambda self, block: events.append(("paragraph", block.text)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_figure", lambda self, block: events.append(("figure", block.caption)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_image", lambda self, path: events.append(("equation", path.name)))
