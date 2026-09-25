@@ -12,8 +12,8 @@ from medium_uploader.models import DisplayEquation, Figure, Paragraph, PullQuote
 from medium_uploader.prepare import PreparationError, prepare_article
 from medium_uploader.validate import format_report, validate_article
 from medium_uploader.clipboard_workflow import (
-    build_asset_sequence,
     build_clipboard_payload,
+    copy_upload_assets,
     copy_plain_text_windows,
     copy_windows_clipboard,
     run_asset_assistant,
@@ -56,17 +56,28 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     try:
+        upload_assets = copy_upload_assets(article)
+    except OSError as exc:
+        print(f"ERROR: Could not copy article upload assets: {exc}", file=sys.stderr)
+        return 1
+    try:
         payload = build_clipboard_payload(article)
         copy_windows_clipboard(payload)
     except (RuntimeError, OSError) as exc:
         print(f"ERROR: Could not prepare the Windows rich clipboard: {exc}", file=sys.stderr)
         return 1
 
-    if not webbrowser.open("https://medium.com/new-story"):
-        print("WARNING: Could not open Medium automatically. Visit https://medium.com/new-story manually.")
+    try:
+        opened = webbrowser.open("https://medium.com/new-story")
+    except Exception as exc:
+        opened = False
+        print(f"WARNING: Could not open Medium automatically: {exc}")
+    if not opened:
+        print("WARNING: Visit https://medium.com/new-story manually.")
     print(f"Copied rich HTML and plain text for: {article.title}")
     print("In Medium, click in the title area and press Ctrl+V.")
-    assets = build_asset_sequence(article)
+    assets = ([upload_assets.feature_image] if upload_assets.feature_image else []) + upload_assets.article_assets
+    print(f"Upload assets folder: {upload_assets.directory}")
     if assets:
         print("After the article is pasted, follow the asset prompts to replace each visible placeholder.")
         try:

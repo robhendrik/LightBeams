@@ -5,6 +5,7 @@ from __future__ import annotations
 import ctypes
 import html
 import re
+import shutil
 import sys
 from dataclasses import dataclass
 from html.parser import HTMLParser
@@ -32,15 +33,23 @@ class ClipboardAsset:
     source: str | None = None
 
 
+@dataclass(frozen=True)
+class UploadAssets:
+    directory: str
+    feature_image: ClipboardAsset | None
+    article_assets: list[ClipboardAsset]
+
+
 class _PlainText(HTMLParser):
     """Extract readable clipboard fallback text and retain link destinations."""
 
     _BLOCKS = {"p", "h1", "h2", "h3", "h4", "blockquote", "li", "div"}
 
-    def __init__(self):
+    def __init__(self, *, include_link_targets: bool = True):
         super().__init__(convert_charrefs=True)
         self.parts: list[str] = []
         self.links: list[tuple[int, str]] = []
+        self.include_link_targets = include_link_targets
 
     def handle_starttag(self, tag, attrs):
         if tag in self._BLOCKS and self.parts and not self.parts[-1].endswith("\n"):
@@ -54,7 +63,7 @@ class _PlainText(HTMLParser):
         if tag == "a" and self.links:
             index, href = self.links.pop()
             text = "".join(self.parts[index:]).strip()
-            if text and text != href:
+            if self.include_link_targets and text and text != href:
                 self.parts.append(f" ({href})")
         if tag in self._BLOCKS and self.parts and not self.parts[-1].endswith("\n"):
             self.parts.append("\n")
@@ -67,6 +76,16 @@ def _plain_text(fragment: str) -> str:
     parser = _PlainText()
     parser.feed(fragment)
     return re.sub(r"\n{3,}", "\n\n", "".join(parser.parts)).strip()
+
+
+def strip_markdown(text: str | None) -> str | None:
+    """Return visible Markdown wording without emphasis, code, or link syntax."""
+    if text is None:
+        return None
+    renderer = mistune.create_markdown(plugins=["table", "strikethrough"])
+    parser = _PlainText(include_link_targets=False)
+    parser.feed(renderer(text))
+    return re.sub(r"\s+", " ", "".join(parser.parts)).strip()
 
 
 def _inline_markdown(markdown_renderer, text: str) -> str:
@@ -98,9 +117,65 @@ def build_asset_sequence(article: Article) -> list[ClipboardAsset]:
                 label=f"[[EQUATION_{equation_index:02d}]]",
                 kind="Equation",
                 path=str(block.rendered_path),
-                alt_text=f"Display equation {equation_index}",
             ))
     return assets
+
+
+def copy_upload_assets(article: Article) -> UploadAssets:
+    """Copy every upload image beside the source article under portable names."""
+    directory = article.source_path.parent / "medium_upload_assets"
+    directory.mkdir(parents=True, exist_ok=True)
+
+    feature_asset = None
+    if article.feature_image is not None:
+        feature_path = directory / "feature_image.png"
+        _copy_asset(article.feature_image, feature_path)
+        metadata_text = lambda key: strip_markdown(article.metadata.get(key)) if isinstance(article.metadata.get(key), str) else None
+        feature_asset = ClipboardAsset(
+            label="Feature image",
+            kind="Feature image",
+            path="medium_upload_assets/feature_image.png",
+            caption=metadata_text("feature_image_caption"),
+            alt_text=metadata_text("feature_image_alt_text"),
+            source=metadata_text("feature_image_source"),
+        )
+
+    copied_assets: list[ClipboardAsset] = []
+    figure_index = 0
+    equation_index = 0
+    for block in article.blocks:
+        if isinstance(block, Figure):
+            figure_index += 1
+            filename = f"figure_{figure_index:02d}.png"
+            _copy_asset(block.source_path, directory / filename)
+            copied_assets.append(ClipboardAsset(
+                label=f"[[FIGURE_{figure_index:02d}]]",
+                kind="Figure",
+                path=f"medium_upload_assets/{filename}",
+                caption=strip_markdown(block.caption),
+                alt_text=strip_markdown(block.alt_text),
+                source=strip_markdown(block.source_attribution),
+            ))
+        elif isinstance(block, DisplayEquation):
+            equation_index += 1
+            filename = f"equation_{equation_index:02d}.png"
+            _copy_asset(block.rendered_path, directory / filename)
+            copied_assets.append(ClipboardAsset(
+                label=f"[[EQUATION_{equation_index:02d}]]",
+                kind="Equation",
+                path=f"medium_upload_assets/{filename}",
+            ))
+    return UploadAssets(
+        directory=str(directory),
+        feature_image=feature_asset,
+        article_assets=copied_assets,
+    )
+
+
+def _copy_asset(source, destination) -> None:
+    if not source.is_file():
+        raise FileNotFoundError(f"Upload image does not exist: {source}")
+    shutil.copy2(source, destination)
 
 
 def _cf_html(document: str) -> bytes:
@@ -208,22 +283,47 @@ def run_asset_assistant(
     input_fn: Callable[[str], str] = input,
     output: TextIO = sys.stdout,
 ) -> None:
-    """Guide manual image insertion and copy caption/alt values on Enter."""
+    """Guide one-Enter transitions, copying figure caption then alt text."""
     for asset in assets:
-        print(f"\n{asset.label} ({asset.kind})", file=output)
-        print(f"Image file: {asset.path}", file=output)
-        print(f"Caption: {asset.caption or '(none; press Enter at the caption step to copy blank text)'}", file=output)
-        print(f"Alt text: {asset.alt_text or '(none; press Enter at the alt-text step to copy blank text)'}", file=output)
+        figure_number = int(asset.label.removeprefix("[[FIGURE_").removesuffix("]]")) if asset.kind == "Figure" else None
+        title = f"Figure {figure_number}" if figure_number is not None else asset.kind
+        print(f"\n{title}", file=output)
+        if asset.label.startswith("[["):
+            print(f"Placeholder: {asset.label}", file=output)
+        print(f"File: {asset.path}", file=output)
         if asset.source:
             print(f"Source: {asset.source}", file=output)
-        print("In Medium: find the placeholder, insert this image, then paste its caption. Open image settings and paste its alt text.", file=output)
-        input_fn("Press Enter when ready to copy the caption: ")
-        copy_text(asset.caption or "")
-        print("Caption copied. Paste it in Medium, then press Enter to copy alt text.", file=output)
-        input_fn("Press Enter when ready to copy alt text: ")
-        copy_text(asset.alt_text or "")
-        print("Alt text copied. Paste it in Medium image settings, then press Enter for the next asset.", file=output)
-        input_fn("Press Enter to continue: ")
+        if asset.kind == "Feature image":
+            print("In Medium, set this image as the feature image.", file=output)
+            if asset.caption or asset.alt_text:
+                if asset.caption:
+                    copy_text(asset.caption)
+                    print("Feature image caption copied to clipboard. Paste it into Medium, then press Enter here.", file=output)
+                    input_fn("Press Enter after pasting the caption: ")
+                if asset.alt_text:
+                    copy_text(asset.alt_text)
+                    print("Feature image alt text copied to clipboard. Paste it into Medium, then press Enter here.", file=output)
+                    input_fn("Press Enter after pasting the alt text: ")
+            else:
+                input_fn("Press Enter after setting the feature image to continue: ")
+            continue
+        if asset.kind == "Equation":
+            print("Find this placeholder in Medium and insert the equation image. No caption or alt-text clipboard step is needed.", file=output)
+            continue
+
+        if asset.caption:
+            caption = asset.caption
+            if asset.source:
+                caption = f"{caption} Source: {asset.source}"
+            copy_text(caption)
+            print(f"Caption for Figure {figure_number} copied to clipboard.", file=output)
+            print("Paste it into Medium, then press Enter here.", file=output)
+            input_fn("Press Enter after pasting the caption: ")
+        if asset.alt_text:
+            copy_text(asset.alt_text)
+            print(f"Alt text for Figure {figure_number} copied to clipboard.", file=output)
+            print("Paste it into Medium image settings, then press Enter here.", file=output)
+            input_fn("Press Enter after pasting the alt text: ")
 
 
 def copy_plain_text_windows(text: str) -> None:
