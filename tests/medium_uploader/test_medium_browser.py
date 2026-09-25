@@ -599,26 +599,26 @@ def test_browser_module_contains_no_publication_controls_or_actions():
     assert "submit" not in called_methods
 
 
-def test_cli_default_mode_invokes_draft_upload_only(tmp_path, monkeypatch, capsys):
+def test_cli_default_mode_copies_article_and_opens_medium_without_browser_automation(tmp_path, monkeypatch, capsys):
     article_path = tmp_path / "article.md"
     article_path.write_text("# Title\n\n### Subtitle\n\nText.\n", encoding="utf-8")
+    original_source = article_path.read_bytes()
     script_path = Path(__file__).resolve().parents[2] / "scripts" / "upload_medium.py"
     spec = importlib.util.spec_from_file_location("upload_medium_default_test", script_path)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)
 
-    class Session:
-        waited = False
-
-        def wait_until_closed(self):
-            self.waited = True
-
-    session = Session()
-    monkeypatch.setattr(medium_browser, "upload_article", lambda prepared: session)
+    observed = {}
+    monkeypatch.setattr(module, "copy_windows_clipboard", lambda payload: observed.update(payload=payload))
+    monkeypatch.setattr(module.webbrowser, "open", lambda url: observed.update(url=url) or True)
+    monkeypatch.setattr(module, "run_asset_assistant", lambda assets, **kwargs: observed.update(assets=assets))
+    monkeypatch.setattr(medium_browser, "upload_article", lambda *_args, **_kwargs: pytest.fail("browser automation must not run"))
     assert module.main([str(article_path)]) == 0
     output = capsys.readouterr().out
-    assert "Draft created successfully." in output
+    assert observed["url"] == "https://medium.com/new-story"
+    assert "Title" in observed["payload"].plain_text
+    assert "assets" not in observed
+    assert "click in the title area and press Ctrl+V" in output
     assert "No publication or submission action was performed." in output
-    assert "Review the open Medium draft manually." in output
-    assert session.waited
+    assert article_path.read_bytes() == original_source

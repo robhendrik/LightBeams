@@ -5,15 +5,23 @@ from __future__ import annotations
 
 import argparse
 import sys
+import webbrowser
 from pathlib import Path
 
 from medium_uploader.models import DisplayEquation, Figure, Paragraph, PullQuote, SectionHeading
 from medium_uploader.prepare import PreparationError, prepare_article
 from medium_uploader.validate import format_report, validate_article
+from medium_uploader.clipboard_workflow import (
+    build_asset_sequence,
+    build_clipboard_payload,
+    copy_plain_text_windows,
+    copy_windows_clipboard,
+    run_asset_assistant,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate or prepare a Medium-ready Markdown article.")
+    parser = argparse.ArgumentParser(description="Validate, prepare, and copy a Medium-ready article.")
     parser.add_argument("article", type=Path, help="Path to the authoritative Markdown article")
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--validate-only", action="store_true", help="Validate without preparing or uploading")
@@ -47,27 +55,26 @@ def main(argv: list[str] | None = None) -> int:
     if args.prepare_only:
         return 0
 
-    # Keep the browser dependency lazy so validation and preparation remain
-    # usable without starting or importing browser automation.
-    from medium_uploader.medium_browser import MediumBrowserError, MediumLoginRequired, upload_article
-
     try:
-        session = upload_article(article)
-    except MediumLoginRequired as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        if exc.session is not None:
-            exc.session.wait_until_closed()
-        return 1
-    except MediumBrowserError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        if exc.session is not None:
-            exc.session.wait_until_closed()
+        payload = build_clipboard_payload(article)
+        copy_windows_clipboard(payload)
+    except (RuntimeError, OSError) as exc:
+        print(f"ERROR: Could not prepare the Windows rich clipboard: {exc}", file=sys.stderr)
         return 1
 
-    print("Draft created successfully.")
-    print("No publication or submission action was performed.")
-    print("Review the open Medium draft manually.")
-    session.wait_until_closed()
+    if not webbrowser.open("https://medium.com/new-story"):
+        print("WARNING: Could not open Medium automatically. Visit https://medium.com/new-story manually.")
+    print(f"Copied rich HTML and plain text for: {article.title}")
+    print("In Medium, click in the title area and press Ctrl+V.")
+    assets = build_asset_sequence(article)
+    if assets:
+        print("After the article is pasted, follow the asset prompts to replace each visible placeholder.")
+        try:
+            run_asset_assistant(assets, copy_text=copy_plain_text_windows)
+        except (RuntimeError, OSError) as exc:
+            print(f"ERROR: Clipboard assistant stopped: {exc}", file=sys.stderr)
+            return 1
+    print("Review the story manually. No publication or submission action was performed.")
     return 0
 
 
