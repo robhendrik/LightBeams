@@ -43,3 +43,75 @@ class ValidationResult:
     def has_fatal(self) -> bool:
         """Whether the article cannot be interpreted safely."""
         return any(f.severity is Severity.FATAL for f in self.findings)
+
+
+@dataclass(frozen=True)
+class Link:
+    """A Markdown hyperlink retained as display text and destination."""
+
+    text: str
+    target: str
+
+
+@dataclass
+class Paragraph:
+    """A prose block with links retained separately from its Markdown text."""
+
+    text: str
+    links: list[Link] = field(default_factory=list)
+
+
+@dataclass
+class SectionHeading:
+    """An authored level-two section heading."""
+
+    text: str
+
+
+@dataclass
+class Figure:
+    """An article image and its associated figure metadata."""
+
+    alt: str
+    source_path: Path
+    caption: str | None = None
+    alt_text: str | None = None
+    source_attribution: str | None = None
+
+
+@dataclass
+class DisplayEquation:
+    """A LaTeX display equation and its generated raster asset."""
+
+    latex: str
+    rendered_path: Path
+
+
+@dataclass
+class PullQuote:
+    """A standalone authored blockquote."""
+
+    text: str
+
+
+@dataclass
+class Footnote:
+    """A footnote prepared for an end-of-article notes section."""
+
+    identifier: str
+    text: str
+    marker: str
+
+
+@dataclass
+class Article:
+    """Medium-independent prepared article and generated build assets."""
+
+    source_path: Path
+    title: str
+    subtitle: str | None
+    metadata: dict[str, Any]
+    blocks: list[Paragraph | SectionHeading | Figure | DisplayEquation | PullQuote]
+    footnotes: list[Footnote]
+    build_dir: Path
+    feature_image: Path | None = None
