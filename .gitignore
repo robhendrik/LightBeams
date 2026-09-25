@@ -25,4 +25,8 @@ Thumbs.db
 # Generated / large results
 output/
 *.npz
-*.npy
+*.npy.medium_build/
+.medium_browser_profile/
+
+.medium_build/
+.medium_browser_profile/
