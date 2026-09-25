@@ -26,64 +26,70 @@ It turns out there are some beam shapes that have this property: they may grow a
 
 ## Diffraction Destroys Shapes — Yet a Gaussian Survives
 
-Consider a beam that travels in the *z* direction and has an amplitude only in *x* direction for simplicity. Once launched, its transverse profile evolves according to one equation — the paraxial wave equation,
+Consider a beam that travels in the *z* direction and, for simplicity, has an amplitude that varies only along *x*. Once launched, its transverse profile evolves according to the paraxial wave equation,
 
 $$i \frac{\partial u}{\partial z} = -\frac{1}{2k} \frac{\partial^2 u}{\partial x^2}$$
 
-— which says how the shape *u(x)* at one distance determines the shape at the next. Crucially, u depends on z: whatever profile you start with, this equation reshapes it as it travels. A sharp feature — a narrow slit, a hard edge — corresponds to rapid variation in x, and rapid variation is exactly what the second-derivative term acts on most strongly. So a shape that starts out crisp does not, in general, stay crisp; the equation itself is a rule for how much a profile *must* change with z, not whether it does.
+The second derivative is the important part. Sharp edges and narrow features have a lot of curvature, so they change rapidly as the beam propagates. Diffraction immediately reshapes a slit, a hard edge, or almost any arbitrary profile.
 
-A Gaussian avoids this fate, and the equation shows why directly. Try
+A Gaussian is different. Suppose we try
 
 $$u(x,z) = \frac{1}{\sqrt{w(z)}} \exp\left[-\frac{x^2}{w(z)^2}\right] \exp[iφ(z)]$$
 
-as an ansatz, and it satisfies the equation exactly — the only z-dependence needed is in the width w(z) and an overall phase φ(z); the underlying shape, "Gaussian," never changes. There's no residual term forcing the profile to distort into something else. The beam widens, but it does so by stretching the same curve, not by growing new structure. A laser beam's spot isn't a fixed picture being carried along and gradually blurred — it's one of the rare shapes the equation lets pass through essentially untouched, which raises the natural question: is it the only one?
+and use this shape in the wave equation. We find that it is an exact solution. The width and phase change as the beam propagates, but the shape does not. Diffraction itself preserves the Gaussian shape, rather than gradually destroying it.
+
+Which raises the obvious question: is it the only one?
 
 ![Figure 1](../outputs/figure_1_diffraction_vs_gaussian.png)
+
 > Caption: **Figure 1. Not every beam keeps its shape. After 5 m of free-space propagation, a hard-edged circular beam develops diffraction rings, while a Gaussian beam simply broadens while retaining its Gaussian profile. Both beams were propagated using the same angular-spectrum calculation. Image by author.**
 > Alt-text: Four-panel comparison of a hard-edged circular beam and a Gaussian beam before and after 5 m of propagation. The circular beam spreads into a broad central spot surrounded by diffraction rings, while the Gaussian beam becomes wider but retains its smooth Gaussian shape.
 
 ## Some Shapes Are Made to Propagate
 
-The Gaussian is not a special exception — it is only the simplest member of a family. Keep the same curved wavefront and overall phase structure as before, but replace the fixed Gaussian bump with some other transverse shape h(ξ), written in the rescaled coordinate ξ = √2 x/w(z):
+The Gaussian is not the only shape that survives propagation. We use a rescaled coordinate, ξ = √2 x/w(z), and introduce a function h(ξ) to describe transverse structure. This gives a more general beam shape:
 
 $$
 u_n(x,z)=\frac{1}{\sqrt{w(z)}}
-\exp\left[\frac{ikx^2}{2R(z)}\right]
-\exp\left[-i\left(n+\tfrac{1}{2}\right)\psi(z)\right]
+e^{ikx^2/2R(z)}
+e^{-i\left(n+\tfrac{1}{2}\right)\psi(z)}
 h(\xi).
 $$
 
-The curvature term and the overall phase are the same as before. The function h(ξ) now carries the Gaussian envelope itself, together with whatever additional structure sits on top of it.
-
-Substitute this into the paraxial equation, and almost all of the z-dependence separates out: the beam has the same expanding width w(z), the same curved wavefront R(z), and a Gouy phase that depends on the mode order n. What remains is a remarkably simple equation for h(ξ) alone:
+When we put this into the paraxial wave equation, the z-dependence separates out. What remains is an equation for the transverse function h(ξ):
 
 $$
-h''(\xi) - 2\xi\,h'(\xi) + 2n\,h(\xi) = 0
+h''(\xi)-2\xi h'(\xi)+2n h(\xi)=0.
 $$
 
-This is the Hermite equation. Its well-behaved polynomial solutions occur when n is a non-negative integer: 0, 1, 2, …, giving the Hermite polynomials Hₙ(ξ). The complete transverse profile is therefore a Gaussian multiplied by one of these polynomials,
+This is the Hermite equation. Its finite polynomial solutions exist only for non-negative integers n = 0, 1, 2, …, giving the Hermite polynomials Hₙ(ξ). The corresponding transverse modes are therefore
 
 $$
-u_n \propto e^{-\xi^2/2}H_n(\xi).
+u_n \propto e^{-\xi^2/2} H_n(\xi).
 $$
 
-For n = 0, H₀ = 1, so we recover the ordinary Gaussian. For n = 1, 2, 3, … the polynomial adds nodes and lobes, producing a whole ladder of increasingly structured beams. They spread as they propagate, just as the fundamental Gaussian does, but their rescaled transverse shape remains unchanged. The equation doesn't hand us one lucky survivor — it hands us an entire family of them.
+For n = 0 we get the ordinary Gaussian. For n = 1, 2, 3, …, extra nodes and lobes appear, but the rescaled shape is still preserved during propagation. So the Gaussian is not one special survivor; it is the first member of a whole family.
 
-This kind of quantization is nothing exotic — it's the same reason a guitar string only rings at certain frequencies: a differential equation plus a boundary condition (stay finite, don't blow up) forces a continuous problem to admit only a discrete set of solutions. No energy levels, no ℏ, nothing quantum required.
+The integer *n* may look like quantum mechanics, but there is nothing quantum here. It appears because the differential equation and the boundary conditions only allow a discrete set of solutions — just as a guitar string only supports certain standing-wave patterns.
 
-The genuinely striking part is that the same equation reappears with a different meaning in quantum mechanics. The Schrödinger equation for a two-dimensional harmonic oscillator has identical mathematical form — but there, the roles are different: it governs a wavefunction evolving in time, and the integer n labels discrete energy. Our beam equation governs a field's shape evolving in space (z stands in for t), and n labels discrete transverse shapes, not discrete energies — a beam of order n can carry any energy at all; nothing here restricts it. Same math, two completely different physical quantities being quantized, for two completely different physical reasons [1].
+However, there is a simple quantum system that follows exactly the same mathematics: the harmonic oscillator [1]. There, the same integer *n* labels discrete energy levels. Here, it labels transverse beam shapes.
+
+The mathematics is the same, but the physical meaning is different.
 
 ![Figure 2](../outputs/figure_2_hermite_gaussian_modes.png)
+
 > Caption: **Figure 2. Gaussian beams come in families. The Hermite–Gaussian modes are labelled by two integers, n and m, which count the transverse structure in the horizontal and vertical directions. The familiar Gaussian beam is simply the lowest member, HG₀₀. Image by author.**
 > Alt text: Four-by-four grid showing the intensity profiles of Hermite–Gaussian laser modes for n and m from 0 to 3. HG00 is a single bright Gaussian spot; increasing n divides the beam into more vertical lobes, while increasing m produces more horizontal lobes.
 
 ## Two Different Beams Can Propagate in Exactly the Same Way
 
-Now imagine a real beam, varying in both x and y. Since the paraxial equation has no term mixing the two directions, a product of two of the 1D shapes found earlier,
+Now imagine a real beam, varying in both x and y. Since the paraxial equation has no term mixing the two directions, a product of two of the 1D shapes found earlier solves $x$ and $y$ directly:
 
-$$u_{n,m}(x,y,z) = χ_n(x)\,χ_m(y)$$
+$$
+u_{n,m}(x,y,z)=u_n(x,z)\,u_m(y,z)
+$$
 
-is itself an exact solution — solve x and y separately, then just multiply. Its Gouy phase is $(n+m+1)ψ(z)$, and only the *sum* n+m enters, not n and m individually. That single fact is the key to everything that follows: two beams with different shapes but the same n+m accumulate identical phase as they propagate, so their relative phase never drifts — any combination fixed at the waist stays fixed forever.
+The Gouy phase is $(n+m+1)ψ(z)$; only the *sum* n+m enters, not n and m individually. This means that two beams with different shapes but the same $n+m$ accumulate identical phase as they propagate, any combination fixed at the waist stays fixed forever.
 
 Take the simplest pair with n+m=1: TEM₁₀ and TEM₀₁, one lobed along x, the other along y. Add and subtract them, and the result is unsurprising — the same two-lobed pattern, just rotated by 45°. Recombining real modes with real coefficients only ever rotates the picture; it can't do anything more interesting, because both ingredients are already real, node-and-lobe patterns.
 
