@@ -601,7 +601,11 @@ def test_browser_module_contains_no_publication_controls_or_actions():
 
 def test_cli_default_mode_copies_article_and_opens_medium_without_browser_automation(tmp_path, monkeypatch, capsys):
     article_path = tmp_path / "article.md"
-    article_path.write_text("# Title\n\n### Subtitle\n\nText.\n", encoding="utf-8")
+    article_path.write_text(
+        "# Title\n\n### Subtitle\n\nText.\n\n![Figure](figure.png)\n> Caption: Caption.\n> Alt text: Alt.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "figure.png").write_bytes(b"figure")
     original_source = article_path.read_bytes()
     script_path = Path(__file__).resolve().parents[2] / "scripts" / "upload_medium.py"
     spec = importlib.util.spec_from_file_location("upload_medium_default_test", script_path)
@@ -610,15 +614,22 @@ def test_cli_default_mode_copies_article_and_opens_medium_without_browser_automa
     spec.loader.exec_module(module)
 
     observed = {}
-    monkeypatch.setattr(module, "copy_windows_clipboard", lambda payload: observed.update(payload=payload))
-    monkeypatch.setattr(module.webbrowser, "open", lambda url: observed.update(url=url) or True)
-    monkeypatch.setattr(module, "run_asset_assistant", lambda assets, **kwargs: observed.update(assets=assets))
+    sequence = []
+    monkeypatch.setattr(module, "copy_windows_clipboard", lambda payload: (observed.update(payload=payload), sequence.append("copy")))
+    monkeypatch.setattr(module.webbrowser, "open", lambda url: (observed.update(url=url), sequence.append("open"), True)[-1])
+    monkeypatch.setattr(module, "run_asset_assistant", lambda assets, **kwargs: (observed.update(assets=assets), sequence.append("assets")))
+    monkeypatch.setattr("builtins.input", lambda prompt: sequence.append(("paste_wait", prompt)))
     monkeypatch.setattr(medium_browser, "upload_article", lambda *_args, **_kwargs: pytest.fail("browser automation must not run"))
     assert module.main([str(article_path)]) == 0
     output = capsys.readouterr().out
     assert observed["url"] == "https://medium.com/new-story"
     assert "Title" in observed["payload"].plain_text
-    assert "assets" not in observed
-    assert "click in the title area and press Ctrl+V" in output
+    assert observed["assets"][0].label == "[[FIGURE_01]]"
+    assert sequence[0:2] == ["copy", "open"]
+    assert sequence[2][0] == "paste_wait"
+    assert sequence[3] == "assets"
+    assert "Article copied to clipboard." in output
+    assert "click in the title area" in output
+    assert "press Ctrl+V" in output
     assert "No publication or submission action was performed." in output
     assert article_path.read_bytes() == original_source

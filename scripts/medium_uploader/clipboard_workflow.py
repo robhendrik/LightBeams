@@ -100,7 +100,10 @@ def build_asset_sequence(article: Article) -> list[ClipboardAsset]:
     assets: list[ClipboardAsset] = []
     figure_index = 0
     equation_index = 0
-    for block in article.blocks:
+    feature_index = _feature_figure_index(article)
+    for index, block in enumerate(article.blocks):
+        if index == feature_index:
+            continue
         if isinstance(block, Figure):
             figure_index += 1
             assets.append(ClipboardAsset(
@@ -127,23 +130,28 @@ def copy_upload_assets(article: Article) -> UploadAssets:
     directory.mkdir(parents=True, exist_ok=True)
 
     feature_asset = None
-    if article.feature_image is not None:
+    feature_index = _feature_figure_index(article)
+    feature_figure = article.blocks[feature_index] if feature_index is not None else None
+    feature_source = article.feature_image or (feature_figure.source_path if isinstance(feature_figure, Figure) else None)
+    if feature_source is not None:
         feature_path = directory / "feature_image.png"
-        _copy_asset(article.feature_image, feature_path)
+        _copy_asset(feature_source, feature_path)
         metadata_text = lambda key: strip_markdown(article.metadata.get(key)) if isinstance(article.metadata.get(key), str) else None
         feature_asset = ClipboardAsset(
             label="Feature image",
             kind="Feature image",
             path="medium_upload_assets/feature_image.png",
-            caption=metadata_text("feature_image_caption"),
-            alt_text=metadata_text("feature_image_alt_text"),
-            source=metadata_text("feature_image_source"),
+            caption=metadata_text("feature_image_caption") or (strip_markdown(feature_figure.caption) if isinstance(feature_figure, Figure) else None),
+            alt_text=metadata_text("feature_image_alt_text") or (strip_markdown(feature_figure.alt_text) if isinstance(feature_figure, Figure) else None),
+            source=metadata_text("feature_image_source") or (strip_markdown(feature_figure.source_attribution) if isinstance(feature_figure, Figure) else None),
         )
 
     copied_assets: list[ClipboardAsset] = []
     figure_index = 0
     equation_index = 0
-    for block in article.blocks:
+    for index, block in enumerate(article.blocks):
+        if index == feature_index:
+            continue
         if isinstance(block, Figure):
             figure_index += 1
             filename = f"figure_{figure_index:02d}.png"
@@ -170,6 +178,20 @@ def copy_upload_assets(article: Article) -> UploadAssets:
         feature_image=feature_asset,
         article_assets=copied_assets,
     )
+
+
+def _feature_figure_index(article: Article) -> int | None:
+    """Identify the distinct feature-image Markdown block, if the source has one."""
+    feature_path = article.feature_image.resolve() if article.feature_image is not None else None
+    for index, block in enumerate(article.blocks):
+        if not isinstance(block, Figure):
+            continue
+        if feature_path is not None and block.source_path.resolve() == feature_path:
+            return index
+        alt_label = re.sub(r"[_-]+", " ", block.alt).strip().casefold()
+        if alt_label == "feature image":
+            return index
+    return None
 
 
 def _copy_asset(source, destination) -> None:
@@ -214,7 +236,10 @@ def build_clipboard_payload(article: Article) -> ClipboardPayload:
     if article.subtitle:
         html_blocks.append(f"<h3>{_inline_markdown(markdown, article.subtitle)}</h3>")
 
-    for block in article.blocks:
+    feature_index = _feature_figure_index(article)
+    for index, block in enumerate(article.blocks):
+        if index == feature_index:
+            continue
         if isinstance(block, Paragraph):
             html_blocks.append(markdown(block.text).strip())
         elif isinstance(block, SectionHeading):

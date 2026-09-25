@@ -74,8 +74,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"WARNING: Could not open Medium automatically: {exc}")
     if not opened:
         print("WARNING: Visit https://medium.com/new-story manually.")
-    print(f"Copied rich HTML and plain text for: {article.title}")
-    print("In Medium, click in the title area and press Ctrl+V.")
+    print("Article copied to clipboard.")
+    print("In Medium:")
+    print("  1. click in the title area")
+    print("  2. press Ctrl+V")
+    input("Press Enter here after you have pasted the article into Medium: ")
     assets = ([upload_assets.feature_image] if upload_assets.feature_image else []) + upload_assets.article_assets
     print(f"Upload assets folder: {upload_assets.directory}")
     if assets:

@@ -123,6 +123,49 @@ def test_figure_one_is_first_body_figure_after_separate_feature_image(tmp_path):
     assert [asset.label for asset in assets if asset.kind == "Equation"] == ["[[EQUATION_01]]", "[[EQUATION_02]]"]
 
 
+def test_feature_image_markdown_block_is_copied_separately_and_not_numbered(tmp_path):
+    article = sample_article(tmp_path)
+    feature_path = tmp_path / "feature-twist.png"
+    feature_path.write_bytes(b"feature")
+    article.blocks.insert(0, Figure(
+        "Feature_image", feature_path, "**A twisted wavefront.**", "A twisted wavefront.", "Image by author."
+    ))
+    upload = copy_upload_assets(article)
+    payload = build_clipboard_payload(article)
+
+    assert upload.feature_image is not None
+    assert upload.feature_image.path == "medium_upload_assets/feature_image.png"
+    assert upload.feature_image.caption == "A twisted wavefront."
+    assert [asset.label for asset in upload.article_assets] == ["[[FIGURE_01]]", "[[EQUATION_01]]"]
+    assert [asset.label for asset in build_asset_sequence(article)] == ["[[FIGURE_01]]", "[[EQUATION_01]]"]
+    assert payload.html.count("[[FIGURE_01]]") == 1
+    assert "[[FIGURE_02]]" not in payload.html
+
+
+def test_assistant_lists_feature_image_before_figure_one_without_numbering_it(tmp_path):
+    article = sample_article(tmp_path)
+    feature_path = tmp_path / "feature.png"
+    feature_path.write_bytes(b"feature")
+    article.blocks.insert(0, Figure("Feature_image", feature_path, "Feature caption", "Feature alt"))
+    upload = copy_upload_assets(article)
+    from io import StringIO
+
+    output = StringIO()
+    prompts = iter(["", "", "", ""])
+    copied = []
+    run_asset_assistant(
+        [upload.feature_image, *upload.article_assets],
+        copy_text=copied.append,
+        input_fn=lambda _prompt: next(prompts),
+        output=output,
+    )
+    report = output.getvalue()
+    assert report.index("Feature image") < report.index("Figure 1")
+    assert "File: medium_upload_assets/feature_image.png" in report
+    assert "Placeholder: [[FIGURE_01]]" in report
+    assert copied == ["Feature caption", "Feature alt", "Figure caption Source: Author", "Figure alt"]
+
+
 def test_interactive_assistant_copies_caption_then_alt_then_advances(tmp_path):
     asset = build_asset_sequence(sample_article(tmp_path))[0]
     inputs = iter(["", ""])
