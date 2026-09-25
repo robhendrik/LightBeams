@@ -55,6 +55,9 @@ class FakePage:
     def get_by_role(self, *args, **kwargs):
         return FakeLocator()
 
+    def title(self):
+        return "Medium editor mock"
+
     def screenshot(self, *, path, **kwargs):
         target = Path(path)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -104,6 +107,11 @@ class ShapeCollection:
 
     def count(self):
         return len(self.items)
+
+    def wait_for(self, *, state, timeout):
+        self.items[0].events.append(("wait_for_collection", state, timeout)) if self.items else None
+        if not self.items:
+            raise TimeoutError("selector did not attach")
 
     def nth(self, index):
         return self.items[index]
@@ -186,12 +194,13 @@ def test_main_editor_uses_single_semantic_story_surface():
     page = ObservedEditorPage(["textbox"])
     assert medium_browser._main_editor(page) is page.editors.first
     assert page.selectors == ['[contenteditable="true"][role="textbox"]']
+    assert page.events[0] == ("wait_for_collection", "attached", 30_000)
 
 
 @pytest.mark.parametrize(
     ("roles", "message"),
     [
-        ([], "expected exactly one"),
+        ([], "did not appear within 30 seconds"),
         (["textbox", "textbox"], "expected exactly one"),
     ],
 )
@@ -423,7 +432,10 @@ def test_failed_editor_discovery_saves_screenshot_and_diagnostics(tmp_path):
     assert diagnostics
     report = diagnostics[0].read_text(encoding="utf-8")
     assert "contenteditable_count: 2" in report
-    assert "candidate_0: tag=div, role=None" in report
+    assert "URL: https://medium.com/new-story" in report
+    assert "Page title: Medium editor mock" in report
+    assert "candidate_0: tag=div, attributes={'role': None, 'data-testid': None, 'class': None}" in report
+    assert "main_story_editor_count: 2" in report
 
 
 def test_launch_uses_persistent_profile_and_headed_browser(tmp_path):

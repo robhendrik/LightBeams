@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterable
-from urllib.parse import urlsplit
 
 from .models import Article, DisplayEquation, Figure, Footnote, Link, Paragraph, PullQuote, SectionHeading
 
@@ -94,6 +93,19 @@ def _get_by_role(page: Any, role: str, name: str, *, exact: bool = True) -> Any:
 def _main_editor(page: Any) -> Any:
     """Find the single story surface using its semantic contenteditable role."""
     editor = page.locator('[contenteditable="true"][role="textbox"]')
+    try:
+        editor.wait_for(state="attached", timeout=30_000)
+    except Exception as exc:
+        try:
+            count_after_timeout = editor.count()
+        except Exception:
+            count_after_timeout = 0
+        if count_after_timeout == 0:
+            raise MediumBrowserError(
+                "Medium's main story editor did not appear within 30 seconds: expected an attached "
+                '[contenteditable="true"][role="textbox"] element.'
+            ) from exc
+        raise MediumBrowserError(f"Could not wait for Medium's main story editor to attach: {exc}") from exc
     try:
         count = editor.count()
     except Exception as exc:
@@ -354,23 +366,29 @@ def _save_failure_screenshot(session: BrowserSession, article: Article) -> Path 
 
 
 def _save_failure_diagnostics(session: BrowserSession, article: Article, error: Exception) -> Path | None:
-    """Save safe editor-discovery diagnostics without URL query data."""
+    """Save page and contenteditable details to diagnose editor startup failures."""
     try:
         screenshot_dir = article.build_dir / "browser_failures"
         screenshot_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
         diagnostic_path = screenshot_dir / f"medium_failure_{timestamp}.txt"
-        url = urlsplit(getattr(session.page, "url", ""))
-        lines = [f"Failure: {error}", f"Page: {url.scheme}://{url.netloc}{url.path}"]
+        lines = [f"Failure: {error}", f"URL: {getattr(session.page, 'url', '')}"]
+        try:
+            lines.append(f"Page title: {session.page.title()}")
+        except Exception as title_error:
+            lines.append(f"Page title unavailable: {title_error}")
         try:
             editors = session.page.locator('[contenteditable="true"]')
             count = editors.count()
             lines.append(f'contenteditable_count: {count}')
-            for index in range(min(count, 10)):
+            for index in range(count):
                 editor = editors.nth(index)
-                role = editor.get_attribute("role")
+                attributes = {
+                    name: editor.get_attribute(name)
+                    for name in ("role", "data-testid", "class")
+                }
                 tag = editor.evaluate("element => element.tagName.toLowerCase()")
-                lines.append(f"candidate_{index}: tag={tag}, role={role!r}")
+                lines.append(f"candidate_{index}: tag={tag}, attributes={attributes!r}")
             main_editors = session.page.locator('[contenteditable="true"][role="textbox"]')
             lines.append(f"main_story_editor_count: {main_editors.count()}")
         except Exception as diagnostic_error:
