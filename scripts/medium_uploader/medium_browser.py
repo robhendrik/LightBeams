@@ -144,7 +144,9 @@ class MediumDraftEditor:
 
     def populate(self, article: Article) -> None:
         self.title_field, self.body_field = _editor_fields(self.page)
-        self.title_field.fill(article.title)
+        self.title_field.click()
+        self._type_into_contenteditable(self.title_field, article.title)
+        self.wait_until_saved()
         self.body_field.click()
         if article.subtitle:
             self._type_plain_text(article.subtitle)
@@ -184,7 +186,29 @@ class MediumDraftEditor:
         saved.first.wait_for(state="visible", timeout=timeout_ms)
 
     def _type_plain_text(self, text: str) -> None:
-        self.keyboard.insert_text(text)
+        try:
+            self.keyboard.insert_text(text)
+        except Exception:
+            self.keyboard.type(text, delay=15)
+
+    def _type_into_contenteditable(self, field: Any, text: str) -> None:
+        """Enter editable text through keyboard events and verify the title."""
+        needs_fallback = False
+        try:
+            self.keyboard.insert_text(text)
+        except Exception:
+            needs_fallback = True
+        else:
+            try:
+                needs_fallback = field.inner_text().strip() != text
+            except Exception:
+                # Some editor locators do not expose rendered text immediately;
+                # successful keyboard insertion remains the preferred path.
+                needs_fallback = False
+        if needs_fallback:
+            field.click()
+            self.keyboard.press("Control+A")
+            self.keyboard.type(text, delay=15)
 
     def _paragraph(self, paragraph: Paragraph) -> None:
         matches = list(_LINK_MARKDOWN.finditer(paragraph.text))

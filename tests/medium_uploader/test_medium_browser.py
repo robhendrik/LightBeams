@@ -150,13 +150,15 @@ def test_profile_is_portable_and_next_to_the_article(tmp_path):
     assert "workspaces" not in str(profile).lower()
 
 
-def test_exact_live_dom_shape_uses_first_contenteditable_for_title_and_second_for_body(tmp_path):
+def test_exact_live_dom_shape_uses_first_contenteditable_for_title_and_second_for_body(tmp_path, monkeypatch):
     article = prepared_article(tmp_path)
     page = ObservedEditorPage(["textbox", None])
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "wait_until_saved", lambda self: page.events.append(("saved",)))
     medium_browser.MediumDraftEditor(page).populate(article)
-    assert ("fill", 0, "A Draft") in page.events
+    assert ("text", "A Draft") in page.events
     assert ("click", 1) in page.events
     assert ("text", "A short subtitle") in page.events
+    assert page.events.index(("text", "A Draft")) < page.events.index(("saved",)) < page.events.index(("click", 1))
 
 
 @pytest.mark.parametrize(
@@ -259,6 +261,9 @@ def test_writer_dispatches_prepared_blocks_in_document_order(tmp_path, monkeypat
         def insert_text(self, text):
             events.append(("text", text))
 
+        def type(self, text, *, delay):
+            events.append(("type", text, delay))
+
     class Page:
         keyboard = Keyboard()
 
@@ -272,14 +277,20 @@ def test_writer_dispatches_prepared_blocks_in_document_order(tmp_path, monkeypat
         def click(self):
             events.append(("click", self.label))
 
+        def inner_text(self):
+            raise RuntimeError("mock does not expose rendered text")
+
     monkeypatch.setattr(medium_browser, "_editor_fields", lambda page: (Field("Title"), Field("Body")))
+    monkeypatch.setattr(medium_browser.MediumDraftEditor, "wait_until_saved", lambda self: events.append(("saved",)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_paragraph", lambda self, block: events.append(("paragraph", block.text)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_figure", lambda self, block: events.append(("figure", block.caption)))
     monkeypatch.setattr(medium_browser.MediumDraftEditor, "_image", lambda self, path: events.append(("equation", path.name)))
 
     medium_browser.MediumDraftEditor(Page()).populate(article)
-    important = [event for event in events if event[0] in {"paragraph", "figure", "equation", "text"}]
+    important = [event for event in events if event[0] in {"paragraph", "figure", "equation", "text", "saved"}]
     assert important == [
+        ("text", "A Draft"),
+        ("saved",),
         ("text", "A short subtitle"),
         ("paragraph", "Paragraph"),
         ("text", "Heading"),
@@ -288,6 +299,40 @@ def test_writer_dispatches_prepared_blocks_in_document_order(tmp_path, monkeypat
         ("text", "Quote"),
         ("text", "Notes"),
         ("text", "¹ A note"),
+    ]
+
+
+def test_title_falls_back_to_keyboard_type_when_insert_text_does_not_update_field():
+    events = []
+
+    class Keyboard:
+        def insert_text(self, text):
+            events.append(("insert_text", text))
+
+        def press(self, key):
+            events.append(("press", key))
+
+        def type(self, text, *, delay):
+            events.append(("type", text, delay))
+
+    class Field:
+        def __init__(self):
+            self.clicks = 0
+
+        def click(self):
+            self.clicks += 1
+            events.append(("click",))
+
+        def inner_text(self):
+            return ""
+
+    editor = medium_browser.MediumDraftEditor(type("Page", (), {"keyboard": Keyboard()})())
+    editor._type_into_contenteditable(Field(), "Title")
+    assert events == [
+        ("insert_text", "Title"),
+        ("click",),
+        ("press", "Control+A"),
+        ("type", "Title", 15),
     ]
 
 
