@@ -8,7 +8,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from medium_uploader.models import DisplayEquation, Figure, Paragraph, PullQuote, SectionHeading
-from medium_uploader.prepare import prepare_article
+from medium_uploader.prepare import _extract_display_equation, prepare_article
+from medium_uploader.render_math import render_equation
 
 
 def write_article(tmp_path: Path, content: str, *, image_paths: tuple[str, ...] = ()) -> Path:
@@ -50,6 +51,37 @@ def test_equations_render_to_ordered_files_and_preserve_latex(tmp_path):
     assert [equation.rendered_path.name for equation in equations] == ["equation_001.png", "equation_002.png"]
     assert all(equation.rendered_path.is_file() for equation in equations)
     assert all(equation.rendered_path.parent == article.build_dir for equation in equations)
+
+
+def test_article_equations_render_with_mathtext_normalization(tmp_path):
+    article_path = Path(__file__).resolve().parents[2] / "post1_beams" / "article.md"
+    source_lines = list(enumerate(article_path.read_text(encoding="utf-8").splitlines(), start=1))
+    equations = []
+    cursor = 0
+    while cursor < len(source_lines):
+        if source_lines[cursor][1].strip().startswith("$$"):
+            latex, cursor, _ = _extract_display_equation(source_lines, cursor)
+            equations.append(latex)
+        else:
+            cursor += 1
+    assert len(equations) == 8
+    # Regression coverage includes partials/fractions, roots, primes, Greek
+    # symbols, Hermite functions, multiline terms, and scalable delimiters.
+    assert r"\partial" in equations[0] and r"\frac" in equations[0]
+    assert r"\sqrt" in equations[2] and r"\frac" in equations[2]
+    assert "H''" in equations[3] and r"\xi" in equations[3]
+    assert "\n" in equations[4] and r"\propto" in equations[4]
+    assert r"\left" in equations[4] and r"\right" in equations[4]
+    for index, latex in enumerate(equations, start=1):
+        output = render_equation(latex, tmp_path / f"article-equation-{index:03d}.png")
+        assert output.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
+
+
+def test_renderer_fails_instead_of_saving_raw_unsupported_latex(tmp_path):
+    output = tmp_path / "unsupported.png"
+    with pytest.raises(RuntimeError, match="Could not render display equation"):
+        render_equation(r"\notARealCommand{x}", output)
+    assert not output.exists()
 
 
 def test_figures_keep_metadata_and_are_not_pull_quotes(tmp_path):

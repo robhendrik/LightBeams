@@ -45,6 +45,30 @@ def _clean_metadata(value: str) -> str:
     return value.strip()
 
 
+def _extract_display_equation(body_lines: list[tuple[int, str]], start: int) -> tuple[str, int, int]:
+    """Return a display equation body, next line index, and opening line number."""
+    line_number, opening_line = body_lines[start]
+    opening = opening_line.strip()
+    if not opening.startswith("$$"):
+        raise PreparationError(f"Expected '$$' at the start of equation on line {line_number}.")
+    body = opening[2:]
+    closing = body.find("$$")
+    if closing >= 0:
+        return body[:closing].strip(), start + 1, line_number
+
+    parts = [body]
+    cursor = start + 1
+    while cursor < len(body_lines):
+        line = body_lines[cursor][1]
+        closing = line.find("$$")
+        if closing >= 0:
+            parts.append(line[:closing])
+            return "\n".join(parts).strip(), cursor + 1, line_number
+        parts.append(line)
+        cursor += 1
+    raise PreparationError(f"Unterminated display equation beginning on line {line_number}.")
+
+
 def prepare_article(article_path: str | Path, validation: ValidationResult | None = None) -> Article:
     """Prepare a validated Markdown article and generated equation assets.
 
@@ -151,23 +175,7 @@ def prepare_article(article_path: str | Path, validation: ValidationResult | Non
             continue
         if stripped.startswith("$$"):
             flush_paragraph()
-            math_parts = [stripped[2:]]
-            closed = "$$" in math_parts[0]
-            if closed:
-                math_parts[0] = math_parts[0].split("$$", 1)[0]
-            pos += 1
-            while not closed and pos < len(body_lines):
-                math_line = body_lines[pos][1]
-                if "$$" in math_line:
-                    math_parts.append(math_line.split("$$", 1)[0])
-                    closed = True
-                    pos += 1
-                    break
-                math_parts.append(math_line)
-                pos += 1
-            if not closed:
-                raise PreparationError(f"Unterminated display equation beginning on line {line_no}.")
-            latex = "\n".join(math_parts).strip()
+            latex, pos, line_no = _extract_display_equation(body_lines, pos)
             equation_index += 1
             output = build_dir / f"equation_{equation_index:03d}.png"
             try:
