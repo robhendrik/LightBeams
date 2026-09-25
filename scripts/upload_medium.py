@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Command-line entry point for Medium article validation and preparation."""
+"""Validate, prepare, or create an unpublished Medium story draft."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from medium_uploader.validate import format_report, validate_article
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate or prepare a Medium-ready Markdown article.")
     parser.add_argument("article", type=Path, help="Path to the authoritative Markdown article")
-    modes = parser.add_mutually_exclusive_group(required=True)
+    modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--validate-only", action="store_true", help="Validate without preparing or uploading")
     modes.add_argument("--prepare-only", action="store_true", help="Validate and prepare assets without opening a browser")
     args = parser.parse_args(argv)
@@ -44,6 +44,30 @@ def main(argv: list[str] | None = None) -> int:
     for block in article.blocks:
         if isinstance(block, DisplayEquation):
             print(f"Equation: {block.rendered_path}")
+    if args.prepare_only:
+        return 0
+
+    # Keep the browser dependency lazy so validation and preparation remain
+    # usable without starting or importing browser automation.
+    from medium_uploader.medium_browser import MediumBrowserError, MediumLoginRequired, upload_article
+
+    try:
+        session = upload_article(article)
+    except MediumLoginRequired as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        if exc.session is not None:
+            exc.session.wait_until_closed()
+        return 1
+    except MediumBrowserError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        if exc.session is not None:
+            exc.session.wait_until_closed()
+        return 1
+
+    print("Draft created successfully.")
+    print("No publication or submission action was performed.")
+    print("Review the open Medium draft manually.")
+    session.wait_until_closed()
     return 0
 
 

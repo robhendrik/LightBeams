@@ -11,6 +11,7 @@ _HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 _IMAGE = re.compile(r"!\[([^]]*)\]\(([^)]+)\)")
 _FOOTNOTE_REF = re.compile(r"\[\^([\w-]+)\]")
 _FOOTNOTE_DEF = re.compile(r"^\s*\[\^([\w-]+)\]:")
+_SINGLE_LINE_DISPLAY = re.compile(r"^\s*\$\$(.*?)\$\$\s*$")
 _KNOWN_METADATA = {
     "topics", "seo_title", "seo_description", "preview_title",
     "preview_subtitle", "feature_image",
@@ -131,17 +132,25 @@ def validate_article(article_path: str | Path) -> ValidationResult:
             if "-->" not in line.split("<!--", 1)[1]:
                 in_html_comment = True
             continue
-        delimiter_count = line.count("$$")
-        if delimiter_count % 2:
-            if in_display_math:
+        single_line_display = _SINGLE_LINE_DISPLAY.fullmatch(line)
+        if in_display_math:
+            if line.strip() == "$$":
                 in_display_math = False
                 display_math_start = None
-            else:
-                in_display_math = True
-                display_math_start = line_no
-        if not in_display_math:
-            # Remove complete display math on a single line before checking inline dollars.
-            check = re.sub(r"\$\$.*?\$\$", "", line)
+            elif "$$" in line:
+                _finding(result, Severity.ERROR, "A multiline display equation must close on its own '$$' line.", line_no)
+                in_display_math = False
+                display_math_start = None
+        elif single_line_display:
+            if not single_line_display.group(1).strip():
+                _finding(result, Severity.ERROR, "A single-line display equation cannot be empty.", line_no)
+        elif line.strip() == "$$":
+            in_display_math = True
+            display_math_start = line_no
+        elif "$$" in line:
+            _finding(result, Severity.ERROR, "Display math must use a standalone '$$ ... $$' line or a multiline block.", line_no)
+        if not in_display_math and not single_line_display:
+            check = line
             check = re.sub(r"`[^`]*`", "", check)
             if re.search(r"(?<!\$)\$(?!\$)[^\n$]+(?<!\$)\$(?!\$)", check):
                 _finding(result, Severity.ERROR, "Inline LaTeX math ($...$) is not supported.", line_no)

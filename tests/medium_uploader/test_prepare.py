@@ -53,6 +53,19 @@ def test_equations_render_to_ordered_files_and_preserve_latex(tmp_path):
     assert all(equation.rendered_path.parent == article.build_dir for equation in equations)
 
 
+def test_prepare_normalizes_single_line_and_multiline_display_equations(tmp_path):
+    path = write_article(
+        tmp_path,
+        "# Title\n\n### Subtitle\n\n$$ \\frac{x}{y} $$\n\n$$\n\\sqrt{x^2+y^2}\n$$\n",
+    )
+    source_before = path.read_bytes()
+    article = prepare_article(path)
+    equations = [block for block in article.blocks if isinstance(block, DisplayEquation)]
+    assert [equation.latex for equation in equations] == [r"\frac{x}{y}", r"\sqrt{x^2+y^2}"]
+    assert all(equation.rendered_path.is_file() for equation in equations)
+    assert path.read_bytes() == source_before
+
+
 def test_article_equations_render_with_mathtext_normalization(tmp_path):
     article_path = Path(__file__).resolve().parents[2] / "post1_beams" / "article.md"
     source_lines = list(enumerate(article_path.read_text(encoding="utf-8").splitlines(), start=1))

@@ -19,7 +19,7 @@ def severities(result):
 
 
 def test_valid_article_and_allowed_display_math(tmp_path):
-    path = article(tmp_path, "# Clear Title\n\n### A Subtitle\n\n## Good Section\n\nText with $$x$$ inline display notation.\n\n$$\nx^2\n$$\n")
+    path = article(tmp_path, "# Clear Title\n\n### A Subtitle\n\n## Good Section\n\n$$ x $$\n\n$$\nx^2\n$$\n")
     result = validate_article(path)
     assert not result.has_errors
     assert result.title == "Clear Title"
@@ -38,8 +38,13 @@ def test_non_title_case_section_is_warning(tmp_path):
 
 
 def test_inline_math_is_error_but_display_math_is_allowed(tmp_path):
-    result = validate_article(article(tmp_path, "# Title\n\nInline $x+y$ and display $$x+y$$.\n\n$$\nz^2\n$$\n"))
+    result = validate_article(article(tmp_path, "# Title\n\nInline $x+y$.\n\n$$ x+y $$\n\n$$\nz^2\n$$\n"))
     assert sum(f.severity is Severity.ERROR and "Inline LaTeX" in f.message for f in result.findings) == 1
+
+
+def test_validator_accepts_both_standalone_display_math_forms(tmp_path):
+    result = validate_article(article(tmp_path, "# Title\n\n$$ a+b $$\n\n$$\nc+d\n$$\n"))
+    assert not any(f.severity in (Severity.ERROR, Severity.FATAL) for f in result.findings)
 
 
 def test_figure_contract_and_relative_image_resolution(tmp_path):
