@@ -108,7 +108,9 @@ The doughnut-shaped intensity is easy to see, but it isn't the interesting part 
 
 Write HG₁₀ + *i* HG₀₁ in polar coordinates, *x* = *ρ* cos *φ*, *y* = *ρ* sin *φ*. Since HG₁₀ ∝ *x* and HG₀₁ ∝ *y* (times the same radial envelope),
 
-$$\text{HG}_{10} + i\,\text{HG}_{01} \;\propto\; (x+iy)\cdot(\text{envelope}) \;=\; ρ\,e^{iφ}\cdot(\text{envelope})$$
+$$
+\text{HG}_{10} + i\,\text{HG}_{01} \;\propto\; (x+iy)\cdot(\text{envelope}) \;=\; ρ\,e^{iφ}\cdot(\text{envelope})
+$$
 
 An explicit *e*ⁱφ falls out. The phase completes a full turn if you walk once around the beam axis (φ goes from 0 to 2π). Follow a surface of constant phase as you also move forward in *z*, and that surface traces a helix around the beam axis. Unlike the real combinations (HG₁₀, HG₀₁), the doughnut has a phase that winds smoothly and continuously around the axis.
 
