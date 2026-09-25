@@ -12,7 +12,7 @@ from medium_uploader.clipboard_workflow import (
     run_asset_assistant,
 )
 from medium_uploader.models import Article, DisplayEquation, Figure, Footnote, Paragraph, PullQuote, SectionHeading
-from medium_uploader.render_math import equation_scale_for_width, render_equation
+from medium_uploader.render_math import BASE_FONT_SIZE, equation_scale_for_width, render_equation
 
 
 def sample_article(tmp_path):
@@ -259,6 +259,8 @@ def test_equation_scale_never_enlarges_short_expressions_and_reduces_long_ones()
     assert equation_scale_for_width(100) == 1.0
     assert equation_scale_for_width(2_000) < 1.0
     assert equation_scale_for_width(2_000) == equation_scale_for_width(2_000)
+    assert BASE_FONT_SIZE == 13
+    assert 0.70 <= BASE_FONT_SIZE / 18 <= 0.75
 
 
 def test_short_equations_keep_the_same_baseline_font_scale(tmp_path):

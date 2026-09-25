@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 
-BASE_FONT_SIZE = 18
+BASE_FONT_SIZE = 13
 DEFAULT_DPI = 300
 MAX_IMAGE_WIDTH_PX = 1800
 IMAGE_PADDING_PX = 32
