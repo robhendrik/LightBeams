@@ -1,25 +1,31 @@
 # Why Doesn't a Laser Beam Lose Its Shape?
 
-### Shine Light Through an Opening of Any Shape and Diffraction Smears It Into a Blob. Laser Beams Somehow Survive Intact — and Figuring Out How Leads Straight to a Surprising Twist.
+### Propagating light easily loses its shape, turning everything into a blur — yet laser beams seem to survive. Finding out how this can be leads to discovering a whole family of beams — and a surprising twist at the end.
 
 ![Feature_image](../outputs/feature_twisted_light.png)
 > Caption: **A helical wavefront — light with a twist.**
 > Alt text: A monochrome 3D rendering of a helical optical wavefront twisting around the direction of propagation, illustrating the spiral phase structure of light carrying orbital angular momentum.
 > Source: Image by author.
 
-Light seems able to take on any shape you shine it through — a keyhole, a leaf, a nebula. In reality none of those shapes should survive: send light through an opening of any form and diffraction blurs it into a formless smear within metres. Yet a laser beam refuses to do this — its bright spot travels for kilometres and comes out looking almost exactly as it started. How can that be?
+Send light through an opening of almost any shape — a keyhole, a slit, a square — and diffraction soon blurs that shape into a formless smear. Yet a laser beam can retain its shape while propagating: its bright spot can travel for kilometres and still look almost exactly as it started. How can that be?
 
-It turns out there are some beam shapes that have this property: they may grow as they travel, but they keep their shape. Look closer, and some of these beams carry momentum sideways, circling the axis instead of pointing straight ahead. That sideways momentum is orbital angular momentum — real enough to make an object rotate.
+It turns out that the familiar shape of a laser beam is a special solution of the paraxial wave equation. The beam expands as it travels, but its shape remains the same. The surprise is that it is not the only one: there is an entire family of beam shapes with this property.
+
+And some of these beams have an even stranger feature. Not all of their momentum points forward — part of it points sideways. That transverse momentum can circulate around the beam axis, giving the light orbital angular momentum. The effect is small, but very real: light can use it to make matter rotate.
 
 ## Diffraction Destroys Shapes — Yet a Gaussian Survives
 
-Consider a beam that travels in the *z* direction and, for simplicity, has an amplitude that varies only along *x*. Once launched, its transverse profile evolves according to the paraxial wave equation,
+Consider a beam that travels in the *z* direction and, for simplicity, has an amplitude *u* that varies only along *x*. For beams like this — travelling mainly in one direction — the full wave equation simplifies to the **paraxial wave equation**:
 
-$$i \frac{\partial u}{\partial z} = -\frac{1}{2k} \frac{\partial^2 u}{\partial x^2}$$
+$$
+i \frac{\partial u}{\partial z}
+=
+-\frac{1}{2k}\frac{\partial^2 u}{\partial x^2}.
+$$
 
-The second derivative is the important part. Sharp edges and narrow features have a lot of curvature, so they change rapidly as the beam propagates. Diffraction immediately reshapes a slit, a hard edge, or almost any other profile.
+The second derivative in the transverse direction (*x*) drives the evolution in *z*, so sharp edges and narrow features change rapidly as the beam propagates. Diffraction immediately reshapes a slit, a hard edge, or almost any other profile.
 
-A Gaussian is different. Suppose we try
+Some profiles are different. Suppose we try a Gaussian shape:
 
 $$
 u(x,z)=\frac{1}{\sqrt{w(z)}}
@@ -28,9 +34,9 @@ e^{ikx^2/2R(z)}
 e^{-i\psi(z)/2}.
 $$
 
-and use this shape in the wave equation. We find that it is an exact solution. The width, wavefront curvature and Gouy phase change as the beam propagates, but the Gaussian shape does not. Diffraction itself preserves the Gaussian shape, rather than gradually destroying it.
+When we put this shape into the wave equation, we find that it is an exact solution. The beam has a Gaussian intensity profile — the familiar bell-curve shape. Its width *w(z)* changes as the wave propagates, but the Gaussian shape itself does not. The beam also has a curved wavefront, with radius *R(z)*, while *ψ(z)* represents a phase shift that builds up during propagation, known as the **Gouy phase**.
 
-Which raises the obvious question: is it the only one?
+This raises the obvious question: is the Gaussian the only shape that survives diffraction?
 
 ![Figure 1](../outputs/figure_1_diffraction_vs_gaussian.png)
 > Caption: **Figure 1. Not every beam keeps its shape. After 5 m of free-space propagation, a hard-edged circular beam develops diffraction rings, while a Gaussian beam simply broadens while retaining its Gaussian profile. Both beams were propagated using the same angular-spectrum calculation.**
