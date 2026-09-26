@@ -15,7 +15,7 @@ And some of these beams have an even stranger feature. Not all of their momentum
 
 ## Diffraction Destroys Shapes — Yet a Gaussian Survives
 
-Consider a beam that travels in the *z* direction and, for simplicity, has an amplitude *u* that varies only along *x*. For beams like this — travelling mainly in one direction — the full wave equation simplifies to the **paraxial wave equation**:
+Consider a beam that travels in the *z* direction and, for simplicity, has an amplitude *u* that varies only along *x* -superscript 1-. For beams like this — travelling mainly in one direction — the full wave equation simplifies to the **paraxial wave equation**:
 
 $$
 i \frac{\partial u}{\partial z}
@@ -45,19 +45,19 @@ This raises the obvious question: is the Gaussian the only shape that survives d
 
 ## Some Shapes Are Made to Propagate
 
-The Gaussian is not the only shape that survives propagation. We use a rescaled coordinate,
+To find out whether there are more shapes that keep their form during propagation, we look for solutions that combine the Gaussian envelope from the previous section with a polynomial *H*(ξ) and an additional phase factor e⁻ⁱⁿψ⁽ᶻ⁾. We use ξ as a scaled transverse coordinate,
 
 $$
-\xi=\sqrt{2}\,\frac{x}{w(z)},
+\xi=\sqrt{2}\,\frac{x}{w(z)}.
 $$
 
-and look for solutions with a Gaussian envelope multiplied by a polynomial *H*(ξ). When we put this form into the paraxial wave equation, the *z*-dependence separates out. What remains is
+When we put this form into the paraxial wave equation, the *z*-dependence separates out. What remains is a differential equation for *H*(ξ):
 
 $$
 H''(\xi)-2\xi H'(\xi)+2nH(\xi)=0.
 $$
 
-This is the Hermite equation. Its finite polynomial solutions exist only for non-negative integers *n* = 0, 1, 2, …, giving the Hermite polynomials Hₙ(ξ). The corresponding one-dimensional modes are
+This is a well-known equation, the Hermite equation. Its polynomial solutions exist only when *n* is a non-negative integer, *n* = 0, 1, 2, …, giving the Hermite polynomials Hₙ(ξ). The corresponding one-dimensional modes are
 
 $$
 u_n(x,z)\propto
@@ -68,67 +68,67 @@ e^{ikx^2/2R(z)}
 e^{-i\left(n+\tfrac{1}{2}\right)\psi(z)}.
 $$
 
-For *n* = 0 we get the ordinary Gaussian. For *n* = 1, 2, 3, …, extra nodes and lobes appear, but the rescaled shape is still preserved during propagation. These are the one-dimensional Hermite–Gaussian modes. The Gaussian is not one special survivor; it is the first member of a whole family.
+For *n* = 0 we get the ordinary Gaussian we have seen before. For *n* = 1, 2, 3, …, extra nodes and lobes appear, but the rescaled shape is still preserved during propagation. These are the one-dimensional Hermite–Gaussian modes. The Gaussian is not one special survivor; it is the first member of a whole family.
 
-> **All light beams undergo diffraction. But some beams keep their shape while doing so**
+> **All light beams undergo diffraction. But some beams keep their shape while doing so.**
 
-The integer *n* may look like quantum mechanics, but there is nothing quantum here. It appears because the differential equation and the boundary conditions only allow a discrete set of solutions — just as a guitar string only supports certain standing-wave patterns.
+The integer *n* may look suspiciously quantum-mechanical, but there is nothing quantum here. It appears because the differential equation and boundary conditions allow only a discrete family of solutions — much as a guitar string supports only certain standing-wave patterns.
 
-However, there is a simple quantum system that follows exactly the same mathematics: the harmonic oscillator [1]. There, the same integer *n* labels discrete energy levels. Here, it labels transverse beam shapes.
+There is, however, a familiar quantum system governed by exactly the same Hermite equation: the harmonic oscillator [1]. There, *n* labels discrete energy levels. Here, it labels transverse beam shapes.
 
-The mathematics is the same, but the physical meaning is different.
+The mathematics is the same; the physical meaning is different.
 
 ![Figure 2](../outputs/figure_2_hermite_gaussian_modes.png)
+
 > Caption: **Figure 2. Gaussian beams come in families. The Hermite–Gaussian modes are labelled by two integers, n and m, which count the transverse structure in the horizontal and vertical directions. The familiar Gaussian beam is the lowest member, HG₀₀.**
 > Alt text: Four-by-four grid showing the intensity profiles of Hermite–Gaussian laser modes for n and m from 0 to 3. HG00 is a single bright Gaussian spot; increasing n divides the beam into more vertical lobes, while increasing m produces more horizontal lobes.
 > Source: Image by author.
 
 ## Two Different Beams Can Propagate in Exactly the Same Way
 
-Now consider a field *u*(*x*, *y*, *z*) that varies in both *x* and *y*. Since the paraxial equation does not mix the two directions, we can solve them separately and multiply the two 1D modes:
+Now consider a field *u*(*x*, *y*, *z*) that varies in both *x* and *y*. Since the paraxial equation does not mix the two transverse directions, we can solve them separately and multiply the two one-dimensional modes:
 
 $$
-u_{n,m}(x,y,z)=u_n(x,z)\,u_m(y,z)
+u_{n,m}(x,y,z)=u_n(x,z)\,u_m(y,z).
 $$
 
-Its Gouy phase is (*n* + *m* + 1) *ψ*(*z*). Only the sum *n* + *m* matters. Two beams with different shapes but the same *n* + *m* therefore accumulate the same phase as they propagate, so a fixed combination of them stays fixed.
+Its Gouy phase is (*n* + *m* + 1) *ψ*(*z*). Only the sum *n* + *m* matters. Two beams with different shapes but the same *n* + *m* therefore accumulate the same phase as they propagate, so a fixed combination of them remains a fixed combination.
 
-The simplest example is *n* + *m* = 1: HG₁₀ and HG₀₁, one lobed along *x* and the other along *y*. Adding or subtracting them does not create a new type of beam. It only rotates the same two-lobed pattern by 45°.
+The simplest example is *n* + *m* = 1: HG₁₀ and HG₀₁, one lobed along *x* and the other along *y*. Adding or subtracting them does not create a fundamentally new beam. It simply rotates the same two-lobed pattern by 45°.
 
-So far we have only used real coefficients. The result changes if we introduce a quarter-cycle phase difference:
+But instead of only adding or subtracting the two modes, we can give one of them a phase shift before combining them. For example, give them a quarter-cycle, or π/2, phase difference:
 
 $$
-\text{HG}_{10}+i\,\text{HG}_{01}
+\text{HG}_{10}+i\,\text{HG}_{01}.
 $$
 
-Now the beam no longer looks like a rotated two-lobed mode. Its intensity becomes a doughnut. More importantly, its phase is different: instead of jumping across a node, it winds smoothly around the dark centre. These vortex modes are usually described as Laguerre–Gaussian (LG) modes; we will simply call them doughnut or vortex beams here.
+Now the beam no longer looks like a rotated two-lobed mode. Its intensity becomes a doughnut. More importantly, something interesting happens to the phase: instead of jumping across a node, it winds smoothly around the dark centre. These vortex modes are usually described as Laguerre–Gaussian (LG) modes; we will simply call them doughnut or vortex beams here.
 
 ![Figure 3](../outputs/figure_3_hg_to_lg.png)
+
 > Caption: **Figure 3. From two lobes to a vortex. HG₁₀ and HG₀₁ can be combined in different ways. Adding or subtracting them produces the same two-lobed pattern at a rotated angle. Add a quarter-cycle (π/2) phase shift between them instead, and the intensity becomes a doughnut. The two doughnuts look identical here—but their hidden phases wind in opposite directions.**
+
 > Alt text: Six intensity plots arranged in two rows and three columns. The first column shows the perpendicular two-lobed HG10 and HG01 modes. Adding and subtracting them produces diagonally rotated two-lobed patterns. Combining them with positive or negative pi-over-two relative phase produces identical doughnut-shaped intensity patterns with a dark centre.
+
 > Source: Image by author.
 
 ## The Doughnut Is Hiding a Twist
 
 The doughnut-shaped intensity is easy to see, but it isn't the interesting part — a ring of light, by itself, is just a shape like any other. The interesting part is hidden in the phase.
 
-Write HG₁₀ + *i* HG₀₁ in polar coordinates, *x* = *ρ* cos *φ*, *y* = *ρ* sin *φ*. Since HG₁₀ ∝ *x* and HG₀₁ ∝ *y* (times the same radial envelope),
+Walk once around the beam axis and the phase completes a full turn of 2π. Follow a surface of constant phase as you also move forward in *z*, and that surface traces a helix around the beam axis. Unlike the earlier combinations of HG₁₀ and HG₀₁, the doughnut has a phase that winds smoothly and continuously around the axis. Depending on whether the relative phase shift is +π/2 or −π/2, the helix winds in one direction or the other.
 
-$$
-\text{HG}_{10} + i\,\text{HG}_{01} \;\propto\; (x+iy)\cdot(\text{envelope}) \;=\; ρ\,e^{iφ}\cdot(\text{envelope})
-$$
+More generally, vortex modes can wind ℓ times around the axis, with a phase factor *e*ⁱℓφ. Our example has ℓ = +1 or −1, depending on which quarter-cycle phase shift we choose. We can build the higher-order versions of these vortices from higher-order HG modes with *n* + *m* = 2, 3, 4, …. We should only combine modes with the same value of *n* + *m*: otherwise the components accumulate different Gouy phases during propagation, and the combined shape will not remain fixed. For the single-ring vortices we consider here, the magnitude of the winding number is
 
-An explicit *e*ⁱφ falls out. The phase completes a full turn if you walk once around the beam axis (φ goes from 0 to 2π). Follow a surface of constant phase as you also move forward in *z*, and that surface traces a helix around the beam axis. Unlike the real combinations (HG₁₀, HG₀₁), the doughnut has a phase that winds smoothly and continuously around the axis.
+|ℓ| = *n* + *m*.
 
-More generally, higher-order modes can wind ℓ times, with a phase *e*ⁱℓφ — ℓ = 1 was just the simplest case. The doughnut you see is the shadow this winding casts on the intensity; the winding itself is the real object.
+The sign of ℓ determines the direction in which the phase helix winds.
 
 > **The doughnut is what we see in the light intensity. The twist is hidden in the phase.**
 
 ## Mode Conversion in Experiments
 
-This isn't just algebra — the same conversion can be done with real optics. Take a Hermite–Gaussian beam oriented at 45° to a pair of cylindrical lenses. In the lenses' own frame, that diagonal mode is simply the in-phase combination of the horizontal and vertical modes.
-
-The lenses focus the beam differently along their two axes, so the horizontal and vertical components pick up different Gouy phases. Choose the lens spacing and beam parameters so that the difference is a quarter cycle, and the output becomes HG₁₀ + i HG₀₁ — the combination that produces the doughnut.
+This isn't just algebra — the conversion can be done for real. Take a Hermite–Gaussian beam oriented at 45° through a pair of cylindrical lenses. In the lenses' own frame, that diagonal mode is  the in-phase combination of the horizontal and vertical modes. The lenses focus the beam differently along their two axes, so the horizontal and vertical components pick up different Gouy phases. Choose the lens spacing and beam parameters so that the difference is a quarter cycle, and the output becomes HG₁₀ + i HG₀₁ — the combination that produces the doughnut.
 
 This mode converter was built and demonstrated in 1993 by Beijersbergen and colleagues in Leiden [2]. A diagonally oriented two-lobed beam goes in at one side, and a vortex comes out at the other.
 
@@ -154,11 +154,11 @@ The sideways linear momentum still cancels when we add contributions from opposi
 
 ## Light Can Actually Make Matter Rotate
 
-We've seen that a beam can carry orbital angular momentum. But angular momentum is conserved — it can't come from nowhere. Think back to the mode converter: a beam with zero orbital angular momentum goes in, and a beam carrying orbital angular momentum comes out. Where did it come from?
+We know that angular momentum is a conserved quantity — it can't come from nowhere, and cannot disappear into nowhere. Think back to the mode converter: a beam with zero orbital angular momentum goes in, and a beam carrying orbital angular momentum comes out. Where did it come from?
 
 It has to come from the lenses. There's no other source. If the light picks up clockwise orbital angular momentum on the way through, the lens system has to recoil counterclockwise — a real, physical kick, exactly as much as the light gained.
 
-This wasn't obvious in 1992. Allen, Beijersbergen, Spreeuw and Woerdman, working in Leiden, were the ones who first worked out that a light beam's spatial structure alone carries angular momentum [3]. They also took up the challenge of actually measuring it. Robert Spreeuw, one of the four, later wrote a personal account of what came next [4]. They hung a pair of cylindrical lenses on a torsion fibre in vacuum and sent a vortex beam through, looking for the tiny twist produced by the reaction torque. It turned out to be "prohibitively difficult," in Spreeuw's own words. The signal was buried under systematic noise they could not resolve. In this case the physics was right, but the experiment never produced a clean enough signal.
+This wasn't obvious in 1992. The Leiden team that first demonstrated the mode conversion were also the ones who first worked out that a light beam's spatial structure alone carries angular momentum [3]. They took up the challenge of actually measuring it. Robert Spreeuw, one of the four, later wrote a personal account of what came next [4]. They hung a pair of cylindrical lenses on a torsion fibre in vacuum and sent a vortex beam through, looking for the tiny twist produced by the reaction torque. It turned out to be "prohibitively difficult," in Spreeuw's own words. The signal was buried under systematic noise they could not resolve. In this case the physics was right, but the experiment never produced a clean enough signal.
 
 The experimental demonstration came not much later, from somewhere else. In 1995, He, Friese, Heckenberg and Rubinsztein-Dunlop skipped the torsion pendulum and went straight for a particle sitting in the beam itself [5]. Small absorbing particles illuminated by a vortex beam started to rotate. When they reversed the vortex's handedness, the particles reversed their rotation too. Orbital angular momentum is not just a theory — a doughnut beam can actually make a particle rotate.
 
@@ -171,6 +171,9 @@ The next question is different: what changes when we actually apply quantum mech
 That is where the next post begins.
 
 ## Bonus
+
+As extra (just because we can) a picture of a higher order doughnut build from third-order HG beams. 
+
 ![Bonus Figure](../outputs/bonus_higher_order_vortex.png)
 > Caption: **Bonus figure — Building a higher-order vortex. A third-order vortex can be constructed from four degenerate Hermite–Gaussian modes with carefully chosen amplitudes and phases. Although the resulting intensity is still a simple doughnut, its hidden phase winds three times around the dark centre — a total phase change of 6π.**
 > Alt text: Four third-order Hermite–Gaussian intensity patterns, labelled HG₃₀, i√3 HG₂₁, −√3 HG₁₂, and −i HG₀₃, combine into a higher-order vortex mode. The resulting mode has a bright circular ring surrounding a dark centre.
@@ -187,3 +190,5 @@ That is where the next post begins.
 [4] R. J. C. Spreeuw, "Spiraling light: from donut modes to a Magnus effect analogy," *Nanophotonics* **11**, 633–644 (2021). https://doi.org/10.1515/nanoph-2021-0458
 
 [5] H. He, M. E. J. Friese, N. R. Heckenberg, and H. Rubinsztein-Dunlop, "Direct observation of transfer of angular momentum to absorptive particles from a laser beam with a phase singularity," *Phys. Rev. Lett.* **75**, 826–829 (1995). https://doi.org/10.1103/PhysRevLett.75.826
+
+superscript 1. An informed reader can wonder what the impact of polarization is. The article considers linearly polarized light and optical components that do not affect this polarization. If we include the option of circular polarization there is yet another source of angular momentum, but that is better discussed in a separate article.
