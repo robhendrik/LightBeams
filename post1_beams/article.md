@@ -15,7 +15,7 @@ And some of these beams have an even stranger feature. Not all of their momentum
 
 ## Diffraction Destroys Shapes — Yet a Gaussian Survives
 
-Consider a beam that travels in the *z* direction and, for simplicity, has an amplitude *u* that varies only along *x* -superscript 1-. For beams like this — travelling mainly in one direction — the full wave equation simplifies to the **paraxial wave equation**:
+Consider a beam that travels in the *z* direction and, for simplicity, has an amplitude *u* that varies only along *x*¹. For beams like this — travelling mainly in one direction — the full wave equation simplifies to the **paraxial wave equation**:
 
 $$
 i \frac{\partial u}{\partial z}
@@ -128,7 +128,7 @@ The sign of ℓ determines the direction in which the phase helix winds.
 
 ## Mode Conversion in Experiments
 
-This isn't just algebra — the conversion can be done for real. Take a Hermite–Gaussian beam oriented at 45° through a pair of cylindrical lenses. In the lenses' own frame, that diagonal mode is  the in-phase combination of the horizontal and vertical modes. The lenses focus the beam differently along their two axes, so the horizontal and vertical components pick up different Gouy phases. Choose the lens spacing and beam parameters so that the difference is a quarter cycle, and the output becomes HG₁₀ + i HG₀₁ — the combination that produces the doughnut.
+This isn't just algebra — the conversion can be done for real. Take a Hermite–Gaussian beam oriented at 45° through a pair of cylindrical lenses. In the lenses' own frame, that diagonal mode is the in-phase combination of the horizontal and vertical modes. The lenses focus the beam differently along their two axes, so the horizontal and vertical components pick up different Gouy phases. Choose the lens spacing and beam parameters so that the difference is a quarter cycle, and the output becomes HG₁₀ + i HG₀₁ — the combination that produces the doughnut.
 
 This mode converter was built and demonstrated in 1993 by Beijersbergen and colleagues in Leiden [2]. A diagonally oriented two-lobed beam goes in at one side, and a vortex comes out at the other.
 
@@ -139,7 +139,7 @@ This mode converter was built and demonstrated in 1993 by Beijersbergen and coll
 
 ## Some of Light's Momentum Points Sideways
 
-We know that light carries momentum: when a beam is absorbed or reflected, it pushes on whatever absorbs or reflects it. For a plane wave that momentum points entirely along the direction of propagation. The push is purely forwards.
+We know that light carries momentum: when a beam is absorbed or reflected, it pushes on whatever absorbs or reflects it. For a plane wave that momentum points entirely along the direction of propagation. The push is purely forward.
 
 For a structured beam, the wavefront is not everywhere perpendicular to the beam axis, and the forward component of the momentum is reduced. This means that there is also sideways, or transverse, momentum. For most beams this transverse momentum averages to zero over the full beam.
 
@@ -154,11 +154,11 @@ The sideways linear momentum still cancels when we add contributions from opposi
 
 ## Light Can Actually Make Matter Rotate
 
-We know that angular momentum is a conserved quantity — it can't come from nowhere, and cannot disappear into nowhere. Think back to the mode converter: a beam with zero orbital angular momentum goes in, and a beam carrying orbital angular momentum comes out. Where did it come from?
+We know that angular momentum is a conserved quantity — it can't come from nowhere, and cannot disappear. Think back to the mode converter: a beam with zero orbital angular momentum goes in, and a beam carrying orbital angular momentum comes out. Where did it come from?
 
 It has to come from the lenses. There's no other source. If the light picks up clockwise orbital angular momentum on the way through, the lens system has to recoil counterclockwise — a real, physical kick, exactly as much as the light gained.
 
-This wasn't obvious in 1992. The Leiden team that first demonstrated the mode conversion were also the ones who first worked out that a light beam's spatial structure alone carries angular momentum [3]. They took up the challenge of actually measuring it. Robert Spreeuw, one of the four, later wrote a personal account of what came next [4]. They hung a pair of cylindrical lenses on a torsion fibre in vacuum and sent a vortex beam through, looking for the tiny twist produced by the reaction torque. It turned out to be "prohibitively difficult," in Spreeuw's own words. The signal was buried under systematic noise they could not resolve. In this case the physics was right, but the experiment never produced a clean enough signal.
+This wasn't obvious in 1992. The Leiden group that first demonstrated the mode conversion was also the one who first worked out that a light beam's spatial structure alone carries angular momentum [3]. They took up the challenge of actually measuring it. Robert Spreeuw, one of the four, later wrote a personal account of what came next [4]. They hung a pair of cylindrical lenses on a torsion fibre in vacuum and sent a vortex beam through, looking for the tiny twist produced by the reaction torque. It turned out to be "prohibitively difficult," in Spreeuw's own words. The signal was buried under systematic noise they could not resolve. In this case the physics was right, but the experiment never produced a clean enough signal.
 
 The experimental demonstration came not much later, from somewhere else. In 1995, He, Friese, Heckenberg and Rubinsztein-Dunlop skipped the torsion pendulum and went straight for a particle sitting in the beam itself [5]. Small absorbing particles illuminated by a vortex beam started to rotate. When they reversed the vortex's handedness, the particles reversed their rotation too. Orbital angular momentum is not just a theory — a doughnut beam can actually make a particle rotate.
 
@@ -172,7 +172,7 @@ That is where the next post begins.
 
 ## Bonus
 
-As extra (just because we can) a picture of a higher order doughnut build from third-order HG beams. 
+As an extra (just because we can), here is a picture of a higher order doughnut build from third-order HG beams. 
 
 ![Bonus Figure](../outputs/bonus_higher_order_vortex.png)
 > Caption: **Bonus figure — Building a higher-order vortex. A third-order vortex can be constructed from four degenerate Hermite–Gaussian modes with carefully chosen amplitudes and phases. Although the resulting intensity is still a simple doughnut, its hidden phase winds three times around the dark centre — a total phase change of 6π.**
@@ -187,8 +187,9 @@ As extra (just because we can) a picture of a higher order doughnut build from t
 
 [3] L. Allen, M. W. Beijersbergen, R. J. C. Spreeuw, and J. P. Woerdman, "Orbital angular momentum of light and the transformation of Laguerre-Gaussian laser modes," *Phys. Rev. A* **45**, 8185–8189 (1992). https://doi.org/10.1103/PhysRevA.45.8185
 
-[4] R. J. C. Spreeuw, "Spiraling light: from donut modes to a Magnus effect analogy," *Nanophotonics* **11**, 633–644 (2021). https://doi.org/10.1515/nanoph-2021-0458
+[4] R. J. C. Spreeuw, "Spiraling light: from donut modes to a Magnus effect analogy," *Nanophotonics* **11**, 633–644 (2022). https://doi.org/10.1515/nanoph-2021-0458
 
 [5] H. He, M. E. J. Friese, N. R. Heckenberg, and H. Rubinsztein-Dunlop, "Direct observation of transfer of angular momentum to absorptive particles from a laser beam with a phase singularity," *Phys. Rev. Lett.* **75**, 826–829 (1995). https://doi.org/10.1103/PhysRevLett.75.826
 
-superscript 1. An informed reader can wonder what the impact of polarization is. The article considers linearly polarized light and optical components that do not affect this polarization. If we include the option of circular polarization there is yet another source of angular momentum, but that is better discussed in a separate article.
+
+¹ An informed reader can wonder about the impact of polarization. The article considers linearly polarized light and optical components that do not affect this polarization. If we include the option of circular polarization there is yet another source of angular momentum, but that is better discussed in a separate article.
