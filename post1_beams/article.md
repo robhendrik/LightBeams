@@ -11,7 +11,7 @@ Send light through an opening of almost any shape — a keyhole, a slit, a squar
 
 It turns out that the familiar shape of a laser beam is a special solution of the paraxial wave equation. The beam expands as it travels, but its shape remains the same. The surprise is that it is not the only one: there is an entire family of beam shapes with this property.
 
-And some of these beams have an even stranger feature. Not all of their momentum points forward — part of it points sideways. That transverse momentum can circulate around the beam axis, giving the light orbital angular momentum. The effect is small, but very real: light can use it to make matter rotate.
+And some of these beams have an even stranger feature. Not all of their momentum points forward — part of it points sideways. That transverse momentum can circulate around the beam axis, giving the light orbital angular momentum. The effect is small, but very real: light with this angular momentum can make matter rotate.
 
 ## Diffraction Destroys Shapes — Yet a Gaussian Survives
 
