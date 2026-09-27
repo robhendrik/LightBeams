@@ -1,4 +1,5 @@
 import sys
+import re
 from pathlib import Path
 
 import pytest
@@ -48,7 +49,7 @@ def test_placeholders_appear_in_html_and_plain_text(tmp_path):
 def test_html_preserves_headings_emphasis_quotes_and_links(tmp_path):
     payload = build_clipboard_payload(sample_article(tmp_path))
     assert "<h1>A <strong>Rich</strong> Title</h1>" in payload.html
-    assert "<h3>A <em>subtitle</em></h3>" in payload.html
+    assert "<h2>A <em>subtitle</em></h2>" in payload.html
     assert '<a href="https://example.com">linked phrase</a>' in payload.html
     assert "<strong>bold</strong>" in payload.html
     assert "<em>italic</em>" in payload.html
@@ -274,22 +275,39 @@ def test_short_equations_keep_the_same_baseline_font_scale(tmp_path):
         )
 
 
-def test_equation_render_scale_keeps_short_equations_at_baseline_and_caps_long_width(tmp_path):
-    short = render_equation("x^2", tmp_path / "short.png", max_width_px=500)
-    long_latex = "+".join(["x"] * 35)
-    long = render_equation(long_latex, tmp_path / "long.png", max_width_px=500)
-    from PIL import Image
-
-    with Image.open(short) as short_png, Image.open(long) as long_png:
-        assert short_png.width < 500
-        assert long_png.width <= 500
-        # Baseline font height remains stable for short expressions; only an
-        # over-width equation is proportionally reduced.
-        assert long_png.height < short_png.height
-
-
 def test_clipboard_rendering_does_not_modify_source(tmp_path):
     article = sample_article(tmp_path)
     before = article.source_path.read_bytes()
     build_clipboard_payload(article)
     assert article.source_path.read_bytes() == before
+
+
+def test_generated_rich_html_has_no_empty_or_spacer_blocks(tmp_path):
+    article = sample_article(tmp_path)
+    article.blocks.extend([Paragraph(" "), SectionHeading(""), PullQuote("\n")])
+    rich_html = build_clipboard_payload(article).html
+    assert re.search(r"<(?:p|h[1-6]|blockquote)\b[^>]*>\s*(?:<br\s*/?>\s*)*</(?:p|h[1-6]|blockquote)\s*>", rich_html, re.I) is None
+    assert re.search(r"<p\b[^>]*>\s*<br\s*/?>\s*</p>", rich_html, re.I) is None
+    assert re.search(r"(?:<br\s*/?>\s*){2,}", rich_html, re.I) is None
+    assert "</h1><h2>" in rich_html
+    assert "</h2><p>" in rich_html
+    assert "<p></p>" not in rich_html
+
+
+def test_equations_use_a_fixed_width_canvas_and_scale_only_if_too_wide(tmp_path):
+    from PIL import Image
+
+    short = render_equation("x^2", tmp_path / "short.png", canvas_width_px=500, horizontal_margin_px=100)
+    long_latex = "+".join(["x"] * 35)
+    long = render_equation(long_latex, tmp_path / "long.png", canvas_width_px=500, horizontal_margin_px=100)
+
+    with Image.open(short) as short_png, Image.open(long) as long_png:
+        short_alpha = short_png.getchannel("A").getbbox()
+        long_alpha = long_png.getchannel("A").getbbox()
+        assert short_png.width == long_png.width == 500
+        assert short_png.mode == long_png.mode == "RGBA"
+        assert short_png.getpixel((0, 0))[3] == 0
+        assert long_png.getpixel((0, 0))[3] == 0
+        assert short_alpha[2] - short_alpha[0] < 300
+        assert long_alpha[2] - long_alpha[0] <= 300
+        assert long_alpha[3] - long_alpha[1] < short_alpha[3] - short_alpha[1]
