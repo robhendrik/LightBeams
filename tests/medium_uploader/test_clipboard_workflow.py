@@ -152,24 +152,28 @@ def test_assistant_lists_feature_image_before_figure_one_without_numbering_it(tm
     from io import StringIO
 
     output = StringIO()
-    prompts = iter(["", "", "", ""])
+    prompts = iter([""] * 7)
     copied = []
+    copied_images = []
     run_asset_assistant(
         [upload.feature_image, *upload.article_assets],
         copy_text=copied.append,
+        copy_image=copied_images.append,
+        asset_base_dir=tmp_path,
         input_fn=lambda _prompt: next(prompts),
         output=output,
     )
     report = output.getvalue()
     assert report.index("Feature image") < report.index("Figure 1")
-    assert "File: medium_upload_assets/feature_image.png" in report
+    assert f"File: {tmp_path / 'medium_upload_assets/feature_image.png'}" in report
     assert "Placeholder: [[FIGURE_01]]" in report
     assert copied == ["Feature caption", "Feature alt", "Figure caption Source: Author", "Figure alt"]
+    assert copied_images == [tmp_path / asset.path for asset in [upload.feature_image, *upload.article_assets]]
 
 
-def test_interactive_assistant_copies_caption_then_alt_then_advances(tmp_path):
+def test_interactive_assistant_copies_image_then_caption_then_alt(tmp_path):
     asset = build_asset_sequence(sample_article(tmp_path))[0]
-    inputs = iter(["", ""])
+    inputs = iter(["", "", ""])
     events = []
     from io import StringIO
 
@@ -178,8 +182,14 @@ def test_interactive_assistant_copies_caption_then_alt_then_advances(tmp_path):
         events.append(("input", prompt))
         return next(inputs)
 
-    run_asset_assistant([asset], copy_text=lambda text: events.append(("copy", text)), input_fn=get_input, output=output)
+    run_asset_assistant(
+        [asset], copy_text=lambda text: events.append(("copy", text)),
+        copy_image=lambda path: events.append(("image", path)), asset_base_dir=tmp_path,
+        input_fn=get_input, output=output,
+    )
     assert events == [
+        ("image", tmp_path / asset.path),
+        ("input", "Press Enter after pasting figure 1: "),
         ("copy", "Figure caption Source: Author"),
         ("input", "Press Enter after pasting the caption: "),
         ("copy", "Figure alt"),
@@ -211,11 +221,16 @@ def test_equations_and_feature_image_do_not_get_unnecessary_clipboard_steps(tmp_
     from io import StringIO
 
     output = StringIO()
-    run_asset_assistant([asset], copy_text=lambda value: pytest.fail("equation has no caption/alt action"),
-                        input_fn=lambda prompt: inputs.append(prompt), output=output)
-    assert inputs == []
+    copied_images = []
+    run_asset_assistant(
+        [asset], copy_text=lambda value: pytest.fail("equation has no caption/alt action"),
+        copy_image=copied_images.append, asset_base_dir=tmp_path,
+        input_fn=lambda prompt: inputs.append(prompt), output=output,
+    )
+    assert inputs == ["Press Enter after pasting equation: "]
+    assert copied_images == [tmp_path / asset.path]
     assert "[[EQUATION_01]]" in output.getvalue()
-    assert "equation_001.png" in output.getvalue()
+    assert str(tmp_path / asset.path) in output.getvalue()
 
 
 def test_feature_image_has_its_own_manual_step_and_no_figure_number(tmp_path):
@@ -229,12 +244,17 @@ def test_feature_image_has_its_own_manual_step_and_no_figure_number(tmp_path):
     from io import StringIO
 
     output = StringIO()
-    run_asset_assistant([feature], copy_text=lambda _value: None, input_fn=prompts.append, output=output)
+    copied_images = []
+    run_asset_assistant(
+        [feature], copy_text=lambda _value: None, copy_image=copied_images.append,
+        asset_base_dir=tmp_path, input_fn=prompts.append, output=output,
+    )
     text = output.getvalue()
     assert "Feature image" in text
-    assert "File: medium_upload_assets/feature_image.png" in text
+    assert f"File: {tmp_path / 'medium_upload_assets/feature_image.png'}" in text
     assert "Figure 1" not in text
     assert len(prompts) == 1
+    assert copied_images == [tmp_path / feature.path]
 
 
 def test_feature_image_caption_and_alt_use_the_same_copy_steps(tmp_path):
@@ -251,9 +271,67 @@ def test_feature_image_caption_and_alt_use_the_same_copy_steps(tmp_path):
     prompts = []
     from io import StringIO
 
-    run_asset_assistant([feature], copy_text=copied.append, input_fn=prompts.append, output=StringIO())
+    image_paths = []
+    events = []
+    run_asset_assistant(
+        [feature],
+        copy_text=lambda text: (copied.append(text), events.append(("text", text))),
+        copy_image=lambda path: (image_paths.append(path), events.append(("image", path))),
+        asset_base_dir=tmp_path,
+        input_fn=lambda prompt: (prompts.append(prompt), events.append(("enter", prompt)))[0],
+        output=StringIO(),
+    )
     assert copied == ["Feature caption", "Feature description"]
-    assert len(prompts) == 2
+    assert image_paths == [tmp_path / feature.path]
+    assert len(prompts) == 3
+    assert events == [
+        ("image", tmp_path / feature.path),
+        ("enter", "Press Enter after pasting the feature image: "),
+        ("text", "Feature caption"),
+        ("enter", "Press Enter after pasting the caption: "),
+        ("text", "Feature description"),
+        ("enter", "Press Enter after pasting the alt text: "),
+    ]
+
+
+@pytest.mark.parametrize("kind", ["feature", "figure"])
+@pytest.mark.parametrize("caption,alt", [(None, None), ("Caption", None), (None, "Alt")])
+def test_missing_caption_or_alt_skips_only_missing_text_step(tmp_path, kind, caption, alt):
+    article = sample_article(tmp_path)
+    if kind == "feature":
+        feature_path = tmp_path / "feature.png"
+        feature_path.write_bytes(b"feature")
+        article.feature_image = feature_path
+        article.metadata.update({"feature_image_caption": caption, "feature_image_alt_text": alt})
+        asset = copy_upload_assets(article).feature_image
+    else:
+        article.blocks[1].caption = caption
+        article.blocks[1].alt_text = alt
+        asset = copy_upload_assets(article).article_assets[0]
+    assert asset is not None
+    copied_images = []
+    copied_text = []
+    prompts = []
+    run_asset_assistant(
+        [asset], copy_text=copied_text.append, copy_image=copied_images.append,
+        asset_base_dir=tmp_path, input_fn=prompts.append,
+    )
+    assert copied_images == [tmp_path / asset.path]
+    expected_text = [value for value in (caption, alt) if value]
+    if kind == "figure" and caption:
+        expected_text[0] = f"{caption} Source: Author"
+    assert copied_text == expected_text
+    assert len(prompts) == 1 + len(copied_text)
+
+
+def test_rich_text_clipboard_generation_keeps_article_formatting_and_placeholders(tmp_path):
+    payload = build_clipboard_payload(sample_article(tmp_path))
+    assert payload.html.startswith('<meta charset="utf-8"><div>')
+    assert "<h1>A <strong>Rich</strong> Title</h1>" in payload.html
+    assert '<a href="https://example.com">linked phrase</a>' in payload.html
+    assert "[[FIGURE_01]]" in payload.html
+    assert "[[EQUATION_01]]" in payload.html
+    assert "[[FIGURE_01]]" in payload.plain_text
 
 
 def test_equation_scale_never_enlarges_short_expressions_and_reduces_long_ones():

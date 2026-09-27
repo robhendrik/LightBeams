@@ -9,9 +9,11 @@ import shutil
 import sys
 from dataclasses import dataclass
 from html.parser import HTMLParser
+from pathlib import Path
 from typing import Callable, TextIO
 
 import mistune
+from PIL import Image
 
 from .models import Article, DisplayEquation, Figure, Paragraph, PullQuote, SectionHeading
 
@@ -342,50 +344,91 @@ def run_asset_assistant(
     assets: list[ClipboardAsset],
     *,
     copy_text: Callable[[str], None],
+    copy_image: Callable[[Path], None],
+    asset_base_dir: str | Path,
     input_fn: Callable[[str], str] = input,
     output: TextIO = sys.stdout,
 ) -> None:
-    """Guide one-Enter transitions, copying figure caption then alt text."""
+    """Guide one-Enter transitions, copying each image, caption, and alt text."""
+    base_dir = Path(asset_base_dir)
     for asset in assets:
         figure_number = int(asset.label.removeprefix("[[FIGURE_").removesuffix("]]")) if asset.kind == "Figure" else None
         title = f"Figure {figure_number}" if figure_number is not None else asset.kind
         print(f"\n{title}", file=output)
         if asset.label.startswith("[["):
             print(f"Placeholder: {asset.label}", file=output)
-        print(f"File: {asset.path}", file=output)
+        image_path = Path(asset.path)
+        if not image_path.is_absolute():
+            image_path = base_dir / image_path
+        print(f"File: {image_path}", file=output)
         if asset.source:
             print(f"Source: {asset.source}", file=output)
+        copy_image(image_path)
         if asset.kind == "Feature image":
             print("In Medium, set this image as the feature image.", file=output)
-            if asset.caption or asset.alt_text:
-                if asset.caption:
-                    copy_text(asset.caption)
-                    print("Feature image caption copied to clipboard. Paste it into Medium, then press Enter here.", file=output)
-                    input_fn("Press Enter after pasting the caption: ")
-                if asset.alt_text:
-                    copy_text(asset.alt_text)
-                    print("Feature image alt text copied to clipboard. Paste it into Medium, then press Enter here.", file=output)
-                    input_fn("Press Enter after pasting the alt text: ")
-            else:
-                input_fn("Press Enter after setting the feature image to continue: ")
+            print('Feature image copied. Paste it into Medium, then press Enter.', file=output)
+            input_fn("Press Enter after pasting the feature image: ")
+            caption_title = "Feature image"
+        elif asset.kind == "Equation":
+            print(f"{title} image copied. Replace the placeholder with Ctrl+V, then press Enter.", file=output)
+            input_fn(f"Press Enter after pasting {title.lower()}: ")
             continue
-        if asset.kind == "Equation":
-            print("Find this placeholder in Medium and insert the equation image. No caption or alt-text clipboard step is needed.", file=output)
-            continue
+        else:
+            print(f"{title} image copied. Replace the placeholder with Ctrl+V, then press Enter.", file=output)
+            input_fn(f"Press Enter after pasting {title.lower()}: ")
+            caption_title = title
 
         if asset.caption:
             caption = asset.caption
-            if asset.source:
+            if asset.source and asset.kind != "Feature image":
                 caption = f"{caption} Source: {asset.source}"
             copy_text(caption)
-            print(f"Caption for Figure {figure_number} copied to clipboard.", file=output)
-            print("Paste it into Medium, then press Enter here.", file=output)
+            print(f"Caption for {caption_title} copied to clipboard. Paste it, then press Enter.", file=output)
             input_fn("Press Enter after pasting the caption: ")
         if asset.alt_text:
             copy_text(asset.alt_text)
-            print(f"Alt text for Figure {figure_number} copied to clipboard.", file=output)
-            print("Paste it into Medium image settings, then press Enter here.", file=output)
+            print(f"Alt text for {caption_title} copied to clipboard. Paste it, then press Enter.", file=output)
             input_fn("Press Enter after pasting the alt text: ")
+
+
+def copy_image_windows(path: str | Path) -> None:
+    """Copy an image to the Windows clipboard in the standard CF_DIB format."""
+    if sys.platform != "win32":
+        raise RuntimeError("Image clipboard copying is supported on Windows for this workflow.")
+
+    from io import BytesIO
+
+    with Image.open(path) as image:
+        bitmap = BytesIO()
+        image.convert("RGB").save(bitmap, format="BMP")
+    dib = bitmap.getvalue()[14:]  # CF_DIB excludes the BMP file header.
+
+    user32 = ctypes.WinDLL("user32", use_last_error=True)
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    _configure_win32_clipboard_apis(user32, kernel32)
+    if not user32.OpenClipboard(None):
+        raise OSError("Could not open the Windows clipboard.")
+    handle = None
+    try:
+        if not user32.EmptyClipboard():
+            raise OSError("Could not clear the Windows clipboard.")
+        handle = kernel32.GlobalAlloc(0x0002, len(dib))  # GMEM_MOVEABLE
+        if not handle:
+            raise OSError("Could not allocate Windows clipboard memory.")
+        pointer = kernel32.GlobalLock(handle)
+        if not pointer:
+            raise OSError("Could not lock Windows clipboard memory.")
+        try:
+            ctypes.memmove(pointer, dib, len(dib))
+        finally:
+            kernel32.GlobalUnlock(handle)
+        if not user32.SetClipboardData(8, handle):  # CF_DIB
+            raise OSError("Could not set the Windows image clipboard data.")
+        handle = None  # Windows owns it after SetClipboardData succeeds.
+    finally:
+        user32.CloseClipboard()
+        if handle:
+            kernel32.GlobalFree(handle)
 
 
 def copy_plain_text_windows(text: str) -> None:

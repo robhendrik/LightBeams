@@ -14,6 +14,7 @@ from medium_uploader.validate import format_report, validate_article
 from medium_uploader.clipboard_workflow import (
     build_clipboard_payload,
     copy_upload_assets,
+    copy_image_windows,
     copy_plain_text_windows,
     copy_windows_clipboard,
     run_asset_assistant,
@@ -84,7 +85,12 @@ def main(argv: list[str] | None = None) -> int:
     if assets:
         print("After the article is pasted, follow the asset prompts to replace each visible placeholder.")
         try:
-            run_asset_assistant(assets, copy_text=copy_plain_text_windows)
+            run_asset_assistant(
+                assets,
+                copy_text=copy_plain_text_windows,
+                copy_image=copy_image_windows,
+                asset_base_dir=Path(upload_assets.directory).parent,
+            )
         except (RuntimeError, OSError) as exc:
             print(f"ERROR: Clipboard assistant stopped: {exc}", file=sys.stderr)
             return 1
