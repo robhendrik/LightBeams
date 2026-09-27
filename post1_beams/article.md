@@ -193,3 +193,5 @@ As an extra (just because we can), here is a picture of a higher order doughnut 
 
 
 ¹ An informed reader can wonder about the impact of polarization. The article considers linearly polarized light and optical components that do not affect this polarization. If we include the option of circular polarization there is yet another source of angular momentum, but that is better discussed in a separate article.
+
+<!-- Version Sept 27 9:01 -->
