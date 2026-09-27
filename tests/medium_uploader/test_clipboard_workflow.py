@@ -10,6 +10,7 @@ from medium_uploader.clipboard_workflow import (
     build_asset_sequence,
     build_clipboard_payload,
     copy_upload_assets,
+    run_metadata_assistant,
     run_asset_assistant,
 )
 from medium_uploader.models import Article, DisplayEquation, Figure, Footnote, Paragraph, PullQuote, SectionHeading
@@ -205,6 +206,45 @@ def test_interactive_assistant_copies_image_then_caption_then_alt(tmp_path):
     assert "Caption for Figure 1 copied to clipboard." in report
     assert "Alt text for Figure 1 copied to clipboard." in report
     assert "continue" not in report.casefold()
+
+
+def test_metadata_assistant_copies_fields_in_order_and_skips_empty_canonical_url():
+    from io import StringIO
+
+    copied = []
+    prompts = []
+    output = StringIO()
+    metadata = {"medium": {
+        "preview_title": "Preview title", "preview_subtitle": "Preview subtitle",
+        "seo_title": "SEO title", "seo_description": "SEO description",
+        "topics": ["Physics", "Optics"], "publication": "Science Spectrum", "canonical_url": "",
+    }}
+    run_metadata_assistant(
+        metadata, copy_text=copied.append, input_fn=prompts.append, output=output,
+    )
+    assert copied == ["Preview title", "Preview subtitle", "SEO title", "SEO description", "Physics", "Optics"]
+    assert len(prompts) == 7  # Four fields, two topics, and publication reminder.
+    report = output.getvalue()
+    assert "Topic 1/2 copied: Physics." in report
+    assert "Topic 2/2 copied: Optics." in report
+    assert "Publication: Science Spectrum" in report
+    assert "canonical URL" not in report
+    assert report.endswith("Nothing has been published.\n")
+
+
+def test_metadata_assistant_copies_nonempty_canonical_url_last():
+    from io import StringIO
+
+    copied = []
+    prompts = []
+    output = StringIO()
+    run_metadata_assistant(
+        {"medium": {"canonical_url": "https://example.test/canonical"}},
+        copy_text=copied.append, input_fn=prompts.append, output=output,
+    )
+    assert copied == ["https://example.test/canonical"]
+    assert len(prompts) == 1
+    assert "Paste it into Medium's canonical URL field" in output.getvalue()
 
 
 def test_caption_markdown_is_stripped_from_clipboard_text(tmp_path):

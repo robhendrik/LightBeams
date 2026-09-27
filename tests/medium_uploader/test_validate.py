@@ -1,4 +1,6 @@
 from pathlib import Path
+
+import pytest
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
@@ -7,9 +9,27 @@ from medium_uploader.models import Severity
 from medium_uploader.validate import validate_article
 
 
+def metadata_block(**overrides):
+    values = {
+        "date": "2026-09-27", "revision": 1,
+        "medium": {
+            "topics": ["Physics", "Optics"],
+            "seo_title": "Why Lasers Keep Their Shape",
+            "seo_description": "A" * 145,
+            "preview_title": "Why Lasers Keep Their Shape",
+            "preview_subtitle": "How laser beams resist diffraction",
+            "publication": "",
+            "canonical_url": "",
+        },
+    }
+    values.update(overrides)
+    import yaml
+    return "<!--\nMETADATA\n" + yaml.safe_dump(values, sort_keys=False) + "-->\n"
+
+
 def article(tmp_path: Path, body: str) -> Path:
     path = tmp_path / "nested" / "article.md"
-    path.parent.mkdir(parents=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(body, encoding="utf-8")
     return path
 
@@ -104,6 +124,71 @@ def test_metadata_parsing_and_unknown_key_warning(tmp_path):
     assert result.metadata["topics"] == ["Science"]
     assert result.metadata["seo_title"] == "Example"
     assert any(f.severity is Severity.WARNING and "Unknown metadata" in f.message for f in result.findings)
+
+
+def test_metadata_yaml_block_parses_bookkeeping_and_all_medium_fields(tmp_path):
+    block = metadata_block()
+    result = validate_article(article(tmp_path, "# Title\n\n### Subtitle\n\n" + block))
+    assert result.metadata["date"] == "2026-09-27"
+    assert result.metadata["revision"] == 1
+    assert result.metadata["medium"] == {
+        "topics": ["Physics", "Optics"],
+        "seo_title": "Why Lasers Keep Their Shape",
+        "seo_description": "A" * 145,
+        "preview_title": "Why Lasers Keep Their Shape",
+        "preview_subtitle": "How laser beams resist diffraction",
+        "publication": "",
+        "canonical_url": "",
+    }
+    assert not result.has_errors
+
+
+@pytest.mark.parametrize("topics", [["One"], ["One", "Two", "Three", "Four", "Five"]])
+def test_metadata_accepts_one_to_five_topics(tmp_path, topics):
+    result = validate_article(article(tmp_path, "# Title\n\n" + metadata_block(medium={**metadata_block_dict(), "topics": topics})))
+    assert not any("topics" in finding.message for finding in result.findings if finding.severity is Severity.ERROR)
+
+
+def metadata_block_dict():
+    return {
+        "seo_title": "A title", "seo_description": "A" * 145,
+        "preview_title": "Preview", "preview_subtitle": "Subtitle",
+        "publication": "", "canonical_url": "",
+    }
+
+
+def test_metadata_rejects_more_than_five_topics_and_missing_required_field(tmp_path):
+    too_many = validate_article(article(tmp_path, "# Title\n\n" + metadata_block(medium={**metadata_block_dict(), "topics": ["A", "B", "C", "D", "E", "F"]})))
+    assert any(f.severity is Severity.ERROR and "1-5" in f.message for f in too_many.findings)
+    missing = validate_article(article(tmp_path, "# Title\n\n" + metadata_block(medium={"topics": ["Physics"]})))
+    assert any(f.severity is Severity.ERROR and "seo_title" in f.message for f in missing.findings)
+
+
+@pytest.mark.parametrize("field,value", [("date", "27-09-2026"), ("date", "2026-02-30"), ("revision", 0), ("revision", -1), ("revision", "one")])
+def test_metadata_rejects_invalid_date_and_revision(tmp_path, field, value):
+    values = {"date": "2026-09-27", "revision": 1, "medium": metadata_block_dict() | {"topics": ["Physics"]}}
+    values[field] = value
+    result = validate_article(article(tmp_path, "# Title\n\n" + metadata_block(**values)))
+    expected = "date" if field == "date" else "revision"
+    assert any(f.severity is Severity.ERROR and expected in f.message for f in result.findings)
+
+
+def test_metadata_empty_optional_fields_are_valid(tmp_path):
+    result = validate_article(article(tmp_path, "# Title\n\n" + metadata_block()))
+    assert not result.has_errors
+    assert result.metadata["medium"]["publication"] == ""
+    assert result.metadata["medium"]["canonical_url"] == ""
+
+
+def test_metadata_length_recommendations_warn_without_failing(tmp_path):
+    medium = metadata_block_dict() | {
+        "topics": ["Physics"], "seo_title": "T" * 61, "seo_description": "Short",
+    }
+    result = validate_article(article(tmp_path, "# Title\n\n" + metadata_block(medium=medium)))
+    messages = [f.message for f in result.findings if f.severity is Severity.WARNING]
+    assert any("seo_title" in message for message in messages)
+    assert any("seo_description" in message for message in messages)
+    assert not result.has_errors
 
 
 def test_duplicate_title_and_heading_line_numbers(tmp_path):

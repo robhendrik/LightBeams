@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from medium_uploader.models import DisplayEquation, Figure, Paragraph, PullQuote, SectionHeading
 from medium_uploader.prepare import _extract_display_equation, prepare_article
+from medium_uploader.clipboard_workflow import build_clipboard_payload
 from medium_uploader.render_math import render_equation
 
 
@@ -142,6 +143,28 @@ def test_metadata_is_carried_forward(tmp_path):
         "topics": ["Science"], "seo_title": "Search title", "seo_description": "Description",
         "preview_title": "Card title", "preview_subtitle": "Card subtitle", "feature_image": "feature.png",
     }
+
+
+def test_metadata_comment_is_excluded_from_prepared_clipboard_payload(tmp_path):
+    metadata = '''<!--
+METADATA
+date: 2026-09-27
+revision: 1
+medium:
+  topics: [Physics]
+  seo_title: Search title
+  seo_description: "A description long enough to be parsed as metadata."
+  preview_title: Card title
+  preview_subtitle: Card subtitle
+  publication: ""
+  canonical_url: ""
+-->
+'''
+    article = prepare_article(write_article(tmp_path, "# Title\n\n### Subtitle\n\nBody text.\n\n" + metadata))
+    payload = build_clipboard_payload(article)
+    assert "METADATA" not in payload.html
+    assert "METADATA" not in payload.plain_text
+    assert "seo_description" not in payload.plain_text
 
 
 def test_headings_and_paragraphs_are_model_blocks(tmp_path):

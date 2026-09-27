@@ -17,6 +17,7 @@ from medium_uploader.clipboard_workflow import (
     copy_image_windows,
     copy_plain_text_windows,
     copy_windows_clipboard,
+    run_metadata_assistant,
     run_asset_assistant,
     strip_markdown,
 )
@@ -99,6 +100,11 @@ def main(argv: list[str] | None = None) -> int:
         except (RuntimeError, OSError) as exc:
             print(f"ERROR: Clipboard assistant stopped: {exc}", file=sys.stderr)
             return 1
+    try:
+        run_metadata_assistant(article.metadata, copy_text=copy_plain_text_windows)
+    except (RuntimeError, OSError) as exc:
+        print(f"ERROR: Metadata assistant stopped: {exc}", file=sys.stderr)
+        return 1
     print("Review the story manually. No publication or submission action was performed.")
     return 0
 

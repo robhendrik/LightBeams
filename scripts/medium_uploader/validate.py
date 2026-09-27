@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import re
+from datetime import date
 from pathlib import Path
+
+import yaml
 
 from .models import Finding, Severity, ValidationResult
 
@@ -17,17 +20,98 @@ _KNOWN_METADATA = {
     "preview_subtitle", "feature_image",
 }
 
+# Keep Medium's current recommendations together for straightforward updates.
+SEO_TITLE_MAX_LENGTH = 60
+SEO_DESCRIPTION_MIN_LENGTH = 140
+SEO_DESCRIPTION_MAX_LENGTH = 156
+MAX_MEDIUM_TOPICS = 5
+_REQUIRED_BOOKKEEPING_FIELDS = ("date", "revision")
+_REQUIRED_MEDIUM_FIELDS = (
+    "topics", "seo_title", "seo_description", "preview_title", "preview_subtitle",
+)
+_OPTIONAL_MEDIUM_FIELDS = ("publication", "canonical_url")
+
 
 def _finding(result: ValidationResult, severity: Severity, message: str, line: int) -> None:
     result.findings.append(Finding(severity, message, line))
 
 
 def _metadata(lines: list[str], result: ValidationResult) -> tuple[set[int], set[int]]:
-    """Parse the one supported YAML-like metadata comment without dependencies."""
-    starts = [i for i, line in enumerate(lines) if line.strip() == "<!-- medium"]
+    """Parse the METADATA YAML comment and the legacy Medium metadata comment."""
     covered: set[int] = set()
+    topic_lines: set[int] = set()
+    metadata_starts = [i for i, line in enumerate(lines) if line.strip() == "METADATA" and i > 0 and lines[i - 1].strip() == "<!--"]
+    if len(metadata_starts) > 1:
+        _finding(result, Severity.FATAL, "Only one METADATA block is allowed.", metadata_starts[1] + 1)
+    if metadata_starts:
+        marker = metadata_starts[0]
+        start = marker - 1
+        end = next((i for i in range(marker + 1, len(lines)) if lines[i].strip() == "-->"), None)
+        if end is None:
+            _finding(result, Severity.FATAL, "Unterminated METADATA block.", start + 1)
+            covered.update(range(start, len(lines)))
+        else:
+            covered.update(range(start, end + 1))
+            try:
+                parsed = yaml.safe_load("\n".join(lines[marker + 1:end]))
+            except yaml.YAMLError as exc:
+                parsed = None
+                _finding(result, Severity.ERROR, f"Malformed METADATA YAML: {exc}", marker + 1)
+            if not isinstance(parsed, dict):
+                _finding(result, Severity.ERROR, "METADATA content must be a YAML mapping.", marker + 1)
+                parsed = {}
+            result.metadata.update(parsed)
+            medium = parsed.get("medium")
+            if not isinstance(medium, dict):
+                _finding(result, Severity.ERROR, "Required metadata field 'medium' must be a mapping.", marker + 1)
+                medium = {}
+                result.metadata["medium"] = medium
+            date_value = parsed.get("date")
+            if isinstance(date_value, date):
+                result.metadata["date"] = date_value.isoformat()
+                date_value = date_value.isoformat()
+            if not isinstance(date_value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date_value):
+                _finding(result, Severity.ERROR, "Metadata 'date' must use ISO YYYY-MM-DD format.", marker + 1)
+            else:
+                try:
+                    date.fromisoformat(date_value)
+                except ValueError:
+                    _finding(result, Severity.ERROR, "Metadata 'date' must be a valid ISO calendar date.", marker + 1)
+            revision = parsed.get("revision")
+            if isinstance(revision, bool) or not isinstance(revision, int) or revision <= 0:
+                _finding(result, Severity.ERROR, "Metadata 'revision' must be a positive integer.", marker + 1)
+            for key in _REQUIRED_BOOKKEEPING_FIELDS:
+                if key not in parsed:
+                    _finding(result, Severity.ERROR, f"Missing required metadata field '{key}'.", marker + 1)
+            for key in _REQUIRED_MEDIUM_FIELDS:
+                if key not in medium:
+                    _finding(result, Severity.ERROR, f"Missing required Medium metadata field '{key}'.", marker + 1)
+            for key in _OPTIONAL_MEDIUM_FIELDS:
+                if key not in medium:
+                    medium[key] = ""
+                elif not isinstance(medium[key], str):
+                    _finding(result, Severity.ERROR, f"Medium '{key}' must be a string (or empty).", marker + 1)
+            topics = medium.get("topics")
+            if not isinstance(topics, list) or not 1 <= len(topics) <= MAX_MEDIUM_TOPICS:
+                _finding(result, Severity.ERROR, "Medium 'topics' must contain 1-5 non-empty strings.", marker + 1)
+            elif any(not isinstance(topic, str) or not topic.strip() for topic in topics):
+                _finding(result, Severity.ERROR, "Medium 'topics' must contain only non-empty strings.", marker + 1)
+            else:
+                topic_lines.update(range(marker + 1, end))
+            for key in ("seo_title", "seo_description", "preview_title", "preview_subtitle"):
+                value = medium.get(key)
+                if not isinstance(value, str) or not value.strip():
+                    _finding(result, Severity.ERROR, f"Medium '{key}' must be a non-empty string.", marker + 1)
+            seo_title = medium.get("seo_title")
+            if isinstance(seo_title, str) and len(seo_title) > SEO_TITLE_MAX_LENGTH:
+                _finding(result, Severity.WARNING, f"Medium seo_title is over {SEO_TITLE_MAX_LENGTH} characters.", marker + 1)
+            description = medium.get("seo_description")
+            if isinstance(description, str) and not SEO_DESCRIPTION_MIN_LENGTH <= len(description) <= SEO_DESCRIPTION_MAX_LENGTH:
+                _finding(result, Severity.WARNING, f"Medium seo_description should be {SEO_DESCRIPTION_MIN_LENGTH}-{SEO_DESCRIPTION_MAX_LENGTH} characters.", marker + 1)
+
+    starts = [i for i, line in enumerate(lines) if line.strip() == "<!-- medium"]
     if not starts:
-        return covered, covered
+        return covered, topic_lines
     if len(starts) > 1:
         _finding(result, Severity.FATAL, "Only one Medium metadata block is allowed.", starts[1] + 1)
     start = starts[0]

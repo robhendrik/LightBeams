@@ -391,6 +391,46 @@ def run_asset_assistant(
             input_fn("Press Enter after pasting the alt text: ")
 
 
+def run_metadata_assistant(
+    metadata: dict,
+    *,
+    copy_text: Callable[[str], None] | None = None,
+    input_fn: Callable[[str], str] = input,
+    output: TextIO = sys.stdout,
+) -> None:
+    """Guide the user through Medium's metadata fields without UI automation."""
+    copy_text = copy_text or copy_plain_text_windows
+    medium = metadata.get("medium", {})
+    steps = (
+        ("preview_title", "Preview title"),
+        ("preview_subtitle", "Preview subtitle"),
+        ("seo_title", "SEO title"),
+        ("seo_description", "SEO description"),
+    )
+    for key, label in steps:
+        value = medium.get(key)
+        if isinstance(value, str) and value.strip():
+            copy_text(value)
+            print(f"{label} copied. Paste it into Medium, then press Enter.", file=output)
+            input_fn("")
+    topics = medium.get("topics", [])
+    if isinstance(topics, list):
+        for index, topic in enumerate(topics, start=1):
+            copy_text(topic)
+            print(f"Topic {index}/{len(topics)} copied: {topic}. Paste/search/select it in Medium, then press Enter.", file=output)
+            input_fn("")
+    publication = medium.get("publication")
+    if isinstance(publication, str) and publication.strip():
+        print(f"Publication: {publication} — select this publication in Medium.", file=output)
+        input_fn("")
+    canonical_url = medium.get("canonical_url")
+    if isinstance(canonical_url, str) and canonical_url.strip():
+        copy_text(canonical_url)
+        print("Canonical URL copied. Paste it into Medium's canonical URL field, then press Enter.", file=output)
+        input_fn("")
+    print("Metadata assistant complete. Review the story and Medium settings manually.\nNothing has been published.", file=output)
+
+
 def copy_image_windows(path: str | Path) -> None:
     """Copy an image to the Windows clipboard in the standard CF_DIB format."""
     if sys.platform != "win32":
