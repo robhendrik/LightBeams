@@ -1,7 +1,5 @@
 # Why Doesn't a Laser Beam Lose Its Shape?
-
 ### Propagating light easily loses its shape, turning everything into a blur — yet laser beams seem to survive. Finding out how this can be leads to discovering a whole family of beams — and a surprising twist at the end.
-
 ![Feature_image](../outputs/feature_twisted_light.png)
 > Caption: **A helical wavefront — light with a twist.**
 > Alt text: A monochrome 3D rendering of a helical optical wavefront twisting around the direction of propagation, illustrating the spiral phase structure of light carrying orbital angular momentum.
@@ -14,7 +12,6 @@ It turns out that the familiar shape of a laser beam is a special solution of th
 And some of these beams have an even stranger feature. Not all of their momentum points forward — part of it points sideways. That transverse momentum can circulate around the beam axis, giving the light orbital angular momentum. The effect is small, but very real: light with this angular momentum can make matter rotate.
 
 ## Diffraction Destroys Shapes — Yet a Gaussian Survives
-
 Consider a beam that travels in the *z* direction and, for simplicity, has an amplitude *u* that varies only along *x*¹. For beams like this — travelling mainly in one direction — the full wave equation simplifies to the **paraxial wave equation**:
 
 $$
@@ -44,7 +41,6 @@ This raises the obvious question: is the Gaussian the only shape that survives d
 > Source: Image by author.
 
 ## Some Shapes Are Made to Propagate
-
 To find out whether there are more shapes that keep their form during propagation, we look for solutions that combine the Gaussian envelope from the previous section with a polynomial *H*(ξ) and an additional phase factor e⁻ⁱⁿψ⁽ᶻ⁾. We use ξ as a scaled transverse coordinate,
 
 $$
@@ -79,13 +75,11 @@ There is, however, a familiar quantum system governed by exactly the same Hermit
 The mathematics is the same; the physical meaning is different.
 
 ![Figure 2](../outputs/figure_2_hermite_gaussian_modes.png)
-
 > Caption: **Figure 2. Gaussian beams come in families. The Hermite–Gaussian modes are labelled by two integers, n and m, which count the transverse structure in the horizontal and vertical directions. The familiar Gaussian beam is the lowest member, HG₀₀.**
 > Alt text: Four-by-four grid showing the intensity profiles of Hermite–Gaussian laser modes for n and m from 0 to 3. HG00 is a single bright Gaussian spot; increasing n divides the beam into more vertical lobes, while increasing m produces more horizontal lobes.
 > Source: Image by author.
 
 ## Two Different Beams Can Propagate in Exactly the Same Way
-
 Now consider a field *u*(*x*, *y*, *z*) that varies in both *x* and *y*. Since the paraxial equation does not mix the two transverse directions, we can solve them separately and multiply the two one-dimensional modes:
 
 $$
@@ -105,15 +99,11 @@ $$
 Now the beam no longer looks like a rotated two-lobed mode. Its intensity becomes a doughnut. More importantly, something interesting happens to the phase: instead of jumping across a node, it winds smoothly around the dark centre. These vortex modes are usually described as Laguerre–Gaussian (LG) modes; we will simply call them doughnut or vortex beams here.
 
 ![Figure 3](../outputs/figure_3_hg_to_lg.png)
-
 > Caption: **Figure 3. From two lobes to a vortex. HG₁₀ and HG₀₁ can be combined in different ways. Adding or subtracting them produces the same two-lobed pattern at a rotated angle. Add a quarter-cycle (π/2) phase shift between them instead, and the intensity becomes a doughnut. The two doughnuts look identical here—but their hidden phases wind in opposite directions.**
-
 > Alt text: Six intensity plots arranged in two rows and three columns. The first column shows the perpendicular two-lobed HG10 and HG01 modes. Adding and subtracting them produces diagonally rotated two-lobed patterns. Combining them with positive or negative pi-over-two relative phase produces identical doughnut-shaped intensity patterns with a dark centre.
-
 > Source: Image by author.
 
 ## The Doughnut Is Hiding a Twist
-
 The doughnut-shaped intensity is easy to see, but it isn't the interesting part — a ring of light, by itself, is just a shape like any other. The interesting part is hidden in the phase.
 
 Walk once around the beam axis and the phase completes a full turn of 2π. Follow a surface of constant phase as you also move forward in *z*, and that surface traces a helix around the beam axis. Unlike the earlier combinations of HG₁₀ and HG₀₁, the doughnut has a phase that winds smoothly and continuously around the axis. Depending on whether the relative phase shift is +π/2 or −π/2, the helix winds in one direction or the other.
@@ -127,7 +117,6 @@ The sign of ℓ determines the direction in which the phase helix winds.
 > **The doughnut is what we see in the light intensity. The twist is hidden in the phase.**
 
 ## Mode Conversion in Experiments
-
 This isn't just algebra — the conversion can be done for real. Take a Hermite–Gaussian beam oriented at 45° through a pair of cylindrical lenses. In the lenses' own frame, that diagonal mode is the in-phase combination of the horizontal and vertical modes. The lenses focus the beam differently along their two axes, so the horizontal and vertical components pick up different Gouy phases. Choose the lens spacing and beam parameters so that the difference is a quarter cycle, and the output becomes HG₁₀ + i HG₀₁ — the combination that produces the doughnut.
 
 This mode converter was built and demonstrated in 1993 by Beijersbergen and colleagues in Leiden [2]. A diagonally oriented two-lobed beam goes in at one side, and a vortex comes out at the other.
@@ -138,7 +127,6 @@ This mode converter was built and demonstrated in 1993 by Beijersbergen and coll
 > Source: Image by author.
 
 ## Some of Light's Momentum Points Sideways
-
 We know that light carries momentum: when a beam is absorbed or reflected, it pushes on whatever absorbs or reflects it. For a plane wave that momentum points entirely along the direction of propagation. The push is purely forward.
 
 For a structured beam, the wavefront is not everywhere perpendicular to the beam axis, and the forward component of the momentum is reduced. This means that there is also sideways, or transverse, momentum. For most beams this transverse momentum averages to zero over the full beam.
@@ -153,7 +141,6 @@ The sideways linear momentum still cancels when we add contributions from opposi
 > Source: Image by author.
 
 ## Light Can Actually Make Matter Rotate
-
 We know that angular momentum is a conserved quantity — it can't come from nowhere, and cannot disappear. Think back to the mode converter: a beam with zero orbital angular momentum goes in, and a beam carrying orbital angular momentum comes out. Where did it come from?
 
 It has to come from the lenses. There's no other source. If the light picks up clockwise orbital angular momentum on the way through, the lens system has to recoil counterclockwise — a real, physical kick, exactly as much as the light gained.
@@ -171,7 +158,6 @@ The next question is different: what changes when we actually apply quantum mech
 That is where the next post begins.
 
 ## Bonus
-
 As an extra (just because we can), here is a picture of a higher order doughnut build from third-order HG beams. 
 
 ![Bonus Figure](../outputs/bonus_higher_order_vortex.png)
@@ -180,7 +166,6 @@ As an extra (just because we can), here is a picture of a higher order doughnut 
 > Source: Image by author.
 
 ## References
-
 [1] G. Nienhuis and L. Allen, "Paraxial wave optics and harmonic oscillators," *Phys. Rev. A* **48**, 656–665 (1993). https://doi.org/10.1103/PhysRevA.48.656
 
 [2] M. W. Beijersbergen, L. Allen, H. E. L. O. van der Veen, and J. P. Woerdman, "Astigmatic laser mode converters and transfer of orbital angular momentum," *Opt. Commun.* **96**, 123–132 (1993). https://doi.org/10.1016/0030-4018(93)90535-D
@@ -194,4 +179,22 @@ As an extra (just because we can), here is a picture of a higher order doughnut 
 
 ¹ An informed reader can wonder about the impact of polarization. The article considers linearly polarized light and optical components that do not affect this polarization. If we include the option of circular polarization there is yet another source of angular momentum, but that is better discussed in a separate article.
 
-<!-- Version Sept 27 9:01 -->
+<!--
+METADATA
+date: 2026-09-27
+revision: 1
+
+medium:
+  topics:
+    - Physics
+    - Optics
+    - Lasers
+    - Science
+    - Light
+  seo_title: Why Doesn't a Laser Beam Lose Its Shape?
+  seo_description: Why do laser beams preserve their shape while other patterns of light blur through diffraction? The answer leads to optical vortices and angular momentum.
+  preview_title: Why Doesn't a Laser Beam Lose Its Shape?
+  preview_subtitle: Why laser beams keep their shape — and how that leads to twisting light.
+  publication: Science Spectrum
+  canonical_url:
+-->

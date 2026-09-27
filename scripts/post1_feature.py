@@ -59,7 +59,7 @@ SPECULAR_POWER = 85
 BACKGROUND_COLOR = "#17191c"
 
 # ----- Optional propagation axis -----
-SHOW_AXIS = True
+SHOW_AXIS = False
 AXIS_RADIUS = 0.018
 AXIS_COLOR = "#777777"
 AXIS_OPACITY = 0.55
