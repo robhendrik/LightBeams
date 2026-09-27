@@ -615,21 +615,23 @@ def test_cli_default_mode_copies_article_and_opens_medium_without_browser_automa
 
     observed = {}
     sequence = []
-    monkeypatch.setattr(module, "copy_windows_clipboard", lambda payload: (observed.update(payload=payload), sequence.append("copy")))
+    monkeypatch.setattr(module, "copy_plain_text_windows", lambda value: (observed.update(title=value), sequence.append("title_copy")))
+    monkeypatch.setattr(module, "copy_windows_clipboard", lambda payload: (observed.update(payload=payload), sequence.append("body_copy")))
     monkeypatch.setattr(module.webbrowser, "open", lambda url: (observed.update(url=url), sequence.append("open"), True)[-1])
     monkeypatch.setattr(module, "run_asset_assistant", lambda assets, **kwargs: (observed.update(assets=assets), sequence.append("assets")))
-    monkeypatch.setattr("builtins.input", lambda prompt: sequence.append(("paste_wait", prompt)))
+    monkeypatch.setattr("builtins.input", lambda *args: sequence.append(("paste_wait", args)))
     monkeypatch.setattr(medium_browser, "upload_article", lambda *_args, **_kwargs: pytest.fail("browser automation must not run"))
     assert module.main([str(article_path)]) == 0
     output = capsys.readouterr().out
     assert observed["url"] == "https://medium.com/new-story"
-    assert "Title" in observed["payload"].plain_text
+    assert observed["title"] == "Title"
+    assert "Title" not in observed["payload"].plain_text
+    assert "Subtitle" in observed["payload"].plain_text
     assert observed["assets"][0].label == "[[FIGURE_01]]"
-    assert sequence[0:2] == ["copy", "open"]
-    assert sequence[2][0] == "paste_wait"
-    assert sequence[3] == "assets"
-    assert "Article copied to clipboard." in output
-    assert "click in the title area" in output
-    assert "press Ctrl+V" in output
+    assert sequence[0:4] == ["title_copy", "open", ("paste_wait", ()), "body_copy"]
+    assert sequence[4] == ("paste_wait", ())
+    assert sequence[5] == "assets"
+    assert "Title copied. Paste it into the Medium title field, then press Enter." in output
+    assert "Article copied. Click in the story body and press Ctrl+V, then press Enter." in output
     assert "No publication or submission action was performed." in output
     assert article_path.read_bytes() == original_source

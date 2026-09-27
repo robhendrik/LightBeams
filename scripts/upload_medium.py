@@ -18,6 +18,7 @@ from medium_uploader.clipboard_workflow import (
     copy_plain_text_windows,
     copy_windows_clipboard,
     run_asset_assistant,
+    strip_markdown,
 )
 
 
@@ -62,10 +63,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: Could not copy article upload assets: {exc}", file=sys.stderr)
         return 1
     try:
-        payload = build_clipboard_payload(article)
-        copy_windows_clipboard(payload)
+        copy_plain_text_windows(strip_markdown(article.title) or "")
     except (RuntimeError, OSError) as exc:
-        print(f"ERROR: Could not prepare the Windows rich clipboard: {exc}", file=sys.stderr)
+        print(f"ERROR: Could not copy the article title to the Windows clipboard: {exc}", file=sys.stderr)
         return 1
 
     try:
@@ -75,11 +75,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"WARNING: Could not open Medium automatically: {exc}")
     if not opened:
         print("WARNING: Visit https://medium.com/new-story manually.")
-    print("Article copied to clipboard.")
-    print("In Medium:")
-    print("  1. click in the title area")
-    print("  2. press Ctrl+V")
-    input("Press Enter here after you have pasted the article into Medium: ")
+    print("Title copied. Paste it into the Medium title field, then press Enter.")
+    input()
+    try:
+        payload = build_clipboard_payload(article)
+        copy_windows_clipboard(payload)
+    except (RuntimeError, OSError) as exc:
+        print(f"ERROR: Could not prepare the Windows rich clipboard: {exc}", file=sys.stderr)
+        return 1
+    print("Article copied. Click in the story body and press Ctrl+V, then press Enter.")
+    input()
     assets = ([upload_assets.feature_image] if upload_assets.feature_image else []) + upload_assets.article_assets
     print(f"Upload assets folder: {upload_assets.directory}")
     if assets:

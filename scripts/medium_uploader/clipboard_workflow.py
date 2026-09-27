@@ -260,8 +260,6 @@ def build_clipboard_payload(article: Article) -> ClipboardPayload:
     assets = build_asset_sequence(article)
     asset_iter = iter(assets)
     html_blocks: list[str] = []
-    if article.title:
-        _append_semantic_block(html_blocks, f"<h1>{_inline_markdown(markdown, article.title)}</h1>")
     if article.subtitle:
         _append_semantic_block(html_blocks, f"<h2>{_inline_markdown(markdown, article.subtitle)}</h2>")
 
@@ -293,7 +291,9 @@ def build_clipboard_payload(article: Article) -> ClipboardPayload:
         _append_semantic_block(html_blocks, "<h2>Notes</h2>")
         html_blocks.extend(visible_notes)
 
-    content = "".join(html_blocks)
+    # Keep semantic blocks distinct for Medium's HTML paste importer. A newline
+    # between tags is whitespace in HTML, not an extra paragraph.
+    content = "\n".join(html_blocks)
     document = f'<meta charset="utf-8"><div>{content}</div>'
     plain = _plain_text(content)
     return ClipboardPayload(html=document, plain_text=plain, cf_html=_cf_html(document))

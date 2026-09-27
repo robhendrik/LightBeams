@@ -48,8 +48,10 @@ def test_placeholders_appear_in_html_and_plain_text(tmp_path):
 
 def test_html_preserves_headings_emphasis_quotes_and_links(tmp_path):
     payload = build_clipboard_payload(sample_article(tmp_path))
-    assert "<h1>A <strong>Rich</strong> Title</h1>" in payload.html
+    assert "Rich" not in payload.html
+    assert "Title" not in payload.plain_text
     assert "<h2>A <em>subtitle</em></h2>" in payload.html
+    assert "subtitle" in payload.plain_text
     assert '<a href="https://example.com">linked phrase</a>' in payload.html
     assert "<strong>bold</strong>" in payload.html
     assert "<em>italic</em>" in payload.html
@@ -327,11 +329,25 @@ def test_missing_caption_or_alt_skips_only_missing_text_step(tmp_path, kind, cap
 def test_rich_text_clipboard_generation_keeps_article_formatting_and_placeholders(tmp_path):
     payload = build_clipboard_payload(sample_article(tmp_path))
     assert payload.html.startswith('<meta charset="utf-8"><div>')
-    assert "<h1>A <strong>Rich</strong> Title</h1>" in payload.html
+    assert "<h1>" not in payload.html
+    assert "<h2>A <em>subtitle</em></h2>" in payload.html
     assert '<a href="https://example.com">linked phrase</a>' in payload.html
     assert "[[FIGURE_01]]" in payload.html
     assert "[[EQUATION_01]]" in payload.html
     assert "[[FIGURE_01]]" in payload.plain_text
+
+
+def test_semantic_blocks_are_adjacent_without_empty_paragraphs(tmp_path):
+    article = sample_article(tmp_path)
+    payload = build_clipboard_payload(article)
+    # Headings and pull quotes should transition directly to their next block.
+    assert re.search(r"</h2>\s*<p>", payload.html)
+    assert re.search(r"</blockquote>\s*<p>", payload.html)
+    # Paragraphs stay distinct and placeholders keep their source positions.
+    assert re.search(r"</p>\s*<p>\[\[FIGURE_01\]\]</p>", payload.html)
+    assert re.search(r"</p>\s*<blockquote>", payload.html)
+    assert payload.html.index("[[FIGURE_01]]") < payload.html.index("quoted") < payload.html.index("[[EQUATION_01]]")
+    assert "<p></p>" not in payload.html
 
 
 def test_equation_scale_never_enlarges_short_expressions_and_reduces_long_ones():
@@ -367,8 +383,8 @@ def test_generated_rich_html_has_no_empty_or_spacer_blocks(tmp_path):
     assert re.search(r"<(?:p|h[1-6]|blockquote)\b[^>]*>\s*(?:<br\s*/?>\s*)*</(?:p|h[1-6]|blockquote)\s*>", rich_html, re.I) is None
     assert re.search(r"<p\b[^>]*>\s*<br\s*/?>\s*</p>", rich_html, re.I) is None
     assert re.search(r"(?:<br\s*/?>\s*){2,}", rich_html, re.I) is None
-    assert "</h1><h2>" in rich_html
-    assert "</h2><p>" in rich_html
+    assert "<h1>" not in rich_html
+    assert re.search(r"</h2>\s*<p>", rich_html)
     assert "<p></p>" not in rich_html
 
 
