@@ -8,23 +8,25 @@ from pathlib import Path
 
 BASE_FONT_SIZE = 13
 DEFAULT_DPI = 300
-MAX_IMAGE_WIDTH_PX = 1800
-IMAGE_PADDING_PX = 32
+CANVAS_WIDTH_PX = 1800
+HORIZONTAL_MARGIN_PX = 200
+VERTICAL_PADDING_PX = 24
+USABLE_CANVAS_WIDTH_PX = CANVAS_WIDTH_PX - (2 * HORIZONTAL_MARGIN_PX)
 
 
-def equation_scale_for_width(measured_width_px: float, max_image_width_px: int = MAX_IMAGE_WIDTH_PX) -> float:
-    """Return a no-enlarge scale, shrinking only when the PNG would exceed its width limit."""
-    available_width = max(1, max_image_width_px - IMAGE_PADDING_PX)
-    return min(1.0, available_width / max(1.0, measured_width_px))
+def equation_scale_for_width(measured_width_px: float, usable_width_px: int = USABLE_CANVAS_WIDTH_PX) -> float:
+    """Return a no-enlarge scale, shrinking only when the equation exceeds usable canvas width."""
+    return min(1.0, usable_width_px / max(1.0, measured_width_px))
 
 
 def render_equation(
     latex: str,
     output_path: str | Path,
     dpi: int = DEFAULT_DPI,
-    max_width_px: int = MAX_IMAGE_WIDTH_PX,
+    canvas_width_px: int = CANVAS_WIDTH_PX,
+    horizontal_margin_px: int = HORIZONTAL_MARGIN_PX,
 ) -> Path:
-    """Render one equation using Matplotlib mathtext without requiring TeX.
+    """Render one equation centered on a fixed-width transparent canvas.
 
     Raises:
         RuntimeError: If Matplotlib cannot parse or render the equation.
@@ -49,14 +51,17 @@ def render_equation(
         # Text artists silently fall back to ordinary text if parsing fails.
         # Parse explicitly first so unsupported syntax is always an error.
         parser = MathTextParser("agg")
-        scale = equation_scale_for_width(parser.parse(math_source, dpi=dpi, prop=FontProperties(size=BASE_FONT_SIZE)).width, max_width_px)
+        usable_width_px = canvas_width_px - (2 * horizontal_margin_px)
+        if usable_width_px <= 0:
+            raise ValueError("horizontal margins must leave a positive usable canvas width")
+        baseline_metrics = parser.parse(math_source, dpi=dpi, prop=FontProperties(size=BASE_FONT_SIZE))
+        scale = equation_scale_for_width(baseline_metrics.width, usable_width_px)
         fontsize = BASE_FONT_SIZE * scale
         metrics = parser.parse(math_source, dpi=dpi, prop=FontProperties(size=fontsize))
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
-        width_px = min(max_width_px, metrics.width + IMAGE_PADDING_PX)
-        height_px = metrics.height + IMAGE_PADDING_PX
-        figure = plt.figure(figsize=(width_px / dpi, height_px / dpi), dpi=dpi)
+        height_px = metrics.height + VERTICAL_PADDING_PX
+        figure = plt.figure(figsize=(canvas_width_px / dpi, height_px / dpi), dpi=dpi)
         figure.patch.set_alpha(0)
         figure.text(0.5, 0.5, math_source, ha="center", va="center", fontsize=fontsize, parse_math=True)
         figure.savefig(output, dpi=dpi, transparent=True, pad_inches=0)

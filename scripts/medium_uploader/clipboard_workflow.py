@@ -72,6 +72,22 @@ class _PlainText(HTMLParser):
         self.parts.append(data)
 
 
+class _ContentProbe(HTMLParser):
+    """Detect visible text or media in one rendered semantic block."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.has_content = False
+
+    def handle_data(self, data):
+        if data.strip():
+            self.has_content = True
+
+    def handle_starttag(self, tag, attrs):
+        if tag in {"img", "video", "audio", "svg"}:
+            self.has_content = True
+
+
 def _plain_text(fragment: str) -> str:
     parser = _PlainText()
     parser.feed(fragment)
@@ -93,6 +109,17 @@ def _inline_markdown(markdown_renderer, text: str) -> str:
     if rendered.startswith("<p>") and rendered.endswith("</p>"):
         return rendered[3:-4]
     return rendered
+
+
+def _append_semantic_block(blocks: list[str], fragment: str) -> bool:
+    """Append visible content only and remove repeated explicit break spacers."""
+    fragment = re.sub(r"(?:<br\s*/?>\s*){2,}", "<br>", fragment, flags=re.IGNORECASE)
+    probe = _ContentProbe()
+    probe.feed(fragment)
+    if probe.has_content:
+        blocks.append(fragment)
+        return True
+    return False
 
 
 def build_asset_sequence(article: Article) -> list[ClipboardAsset]:
@@ -232,29 +259,39 @@ def build_clipboard_payload(article: Article) -> ClipboardPayload:
     asset_iter = iter(assets)
     html_blocks: list[str] = []
     if article.title:
-        html_blocks.append(f"<h1>{_inline_markdown(markdown, article.title)}</h1>")
+        _append_semantic_block(html_blocks, f"<h1>{_inline_markdown(markdown, article.title)}</h1>")
     if article.subtitle:
-        html_blocks.append(f"<h3>{_inline_markdown(markdown, article.subtitle)}</h3>")
+        _append_semantic_block(html_blocks, f"<h2>{_inline_markdown(markdown, article.subtitle)}</h2>")
 
     feature_index = _feature_figure_index(article)
     for index, block in enumerate(article.blocks):
         if index == feature_index:
             continue
         if isinstance(block, Paragraph):
-            html_blocks.append(markdown(block.text).strip())
+            _append_semantic_block(html_blocks, markdown(block.text).strip())
         elif isinstance(block, SectionHeading):
-            html_blocks.append(f"<h2>{_inline_markdown(markdown, block.text)}</h2>")
+            _append_semantic_block(html_blocks, f"<h2>{_inline_markdown(markdown, block.text)}</h2>")
         elif isinstance(block, PullQuote):
             rendered = markdown(block.text).strip()
-            html_blocks.append(f"<blockquote>{rendered}</blockquote>")
+            _append_semantic_block(html_blocks, f"<blockquote>{rendered}</blockquote>")
         elif isinstance(block, (Figure, DisplayEquation)):
             asset = next(asset_iter)
-            html_blocks.append(f"<p>{html.escape(asset.label)}</p>")
-    if article.footnotes:
-        html_blocks.append("<h2>Notes</h2>")
-        html_blocks.extend(f"<p>{html.escape(note.marker)} {_inline_markdown(markdown, note.text)}</p>" for note in article.footnotes)
+            _append_semantic_block(html_blocks, f"<p>{html.escape(asset.label)}</p>")
+    note_blocks = [
+        f"<p>{html.escape(note.marker)} {_inline_markdown(markdown, note.text)}</p>"
+        for note in article.footnotes
+    ]
+    visible_notes: list[str] = []
+    for note_block in note_blocks:
+        probe = _ContentProbe()
+        probe.feed(note_block)
+        if probe.has_content:
+            visible_notes.append(note_block)
+    if visible_notes:
+        _append_semantic_block(html_blocks, "<h2>Notes</h2>")
+        html_blocks.extend(visible_notes)
 
-    content = "\n".join(html_blocks)
+    content = "".join(html_blocks)
     document = f'<meta charset="utf-8"><div>{content}</div>'
     plain = _plain_text(content)
     return ClipboardPayload(html=document, plain_text=plain, cf_html=_cf_html(document))
