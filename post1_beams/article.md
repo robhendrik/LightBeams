@@ -196,5 +196,5 @@ medium:
   preview_title: Why Doesn't a Laser Beam Lose Its Shape?
   preview_subtitle: Why laser beams keep their shape — and how that leads to twisting light.
   publication: Science Spectrum
-  canonical_url:
+  canonical_url: "None"
 -->
