@@ -59,7 +59,7 @@ HSPACE = 0.08
 
 # ----- Output -----
 
-OUTPUT_DIR = Path("./outputs")
+OUTPUT_DIR = Path("../outputs")
 
 OUTPUT_PNG = "bonus_higher_order_vortex.png"
 OUTPUT_PDF = "bonus_higher_order_vortex.pdf"
