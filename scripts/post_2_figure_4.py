@@ -18,7 +18,7 @@ The spatial mode shape is unchanged when one photon is added. The lower row
 is only schematically brighter to indicate the additional excitation.
 
 Output:
-    outputs/post_2_figure_5.png
+    outputs/post_2_figure_4.png
 """
 
 from pathlib import Path
@@ -33,7 +33,7 @@ from scipy.special import eval_hermite, eval_genlaguerre
 # CONFIGURATION
 # ============================================================
 
-OUTPUT = Path(__file__).resolve().parents[1] / "outputs" / "post_2_figure_5.png"
+OUTPUT = Path(__file__).resolve().parents[1] / "outputs" / "post_2_figure_4.png"
 
 # Beam / numerical grid
 WAIST = 0.70e-3
@@ -242,19 +242,32 @@ fig.text(
 
 # Put the physical increment below each column rather than inside the
 # intensity images. The spatial profiles themselves remain uncluttered.
+# Shared header, once, centered under both columns
+
 fig.text(
-    0.29,
-    0.025,
-    r"$+\hbar\omega,\quad +\hbar k,\quad \Delta L_z=0$",
+    0.5,
+    0.04,
+    "Adding one photon adds: energy, momentum, orbital angular momentum",
     fontsize=ANNOTATION_FONTSIZE,
     ha="center",
     va="bottom",
 )
 
+# Hermite–Gaussian column
+fig.text(
+    0.29,
+    0.005,
+    r"$+\hbar\omega,\quad +\hbar k,\quad \langle\Delta L_z\rangle = 0$",
+    fontsize=ANNOTATION_FONTSIZE,
+    ha="center",
+    va="bottom",
+)
+
+# Laguerre–Gaussian column
 fig.text(
     0.76,
-    0.025,
-    rf"$+\hbar\omega,\quad +\hbar k,\quad +{LG_ELL}\hbar\ \mathrm{{OAM}}$",
+    0.005,
+    rf"$+\hbar\omega,\quad +\hbar k,\quad \Delta L_z = +{LG_ELL}\hbar$",
     fontsize=ANNOTATION_FONTSIZE,
     ha="center",
     va="bottom",

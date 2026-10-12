@@ -1,9 +1,0 @@
-numpy
-scipy
-matplotlib
-pandas
-jupyter
-pytest
-playwright
-mistune
-PyYAML

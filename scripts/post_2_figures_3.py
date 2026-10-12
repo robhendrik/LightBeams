@@ -14,8 +14,8 @@ Figure 4:
 The styling intentionally matches post_2_figure_2.py.
 
 Outputs:
-    outputs/post_2_figure_3.png
-    outputs/post_2_figure_4.png
+    This one removed: outputs/post_2_figure_3.png
+    This one now called figure_4: outputs/post_2_figure_4.png
 """
 
 from pathlib import Path
@@ -30,8 +30,8 @@ from matplotlib.patches import FancyArrowPatch
 # ---------------------------------------------------------------------------
 
 OUTPUT_DIR = Path(__file__).resolve().parents[1] / "outputs"
-OUTPUT_3 = OUTPUT_DIR / "post_2_figure_3.png"
-OUTPUT_4 = OUTPUT_DIR / "post_2_figure_4.png"
+OUTPUT_3 = OUTPUT_DIR / "post_2_figure_removed.png"
+OUTPUT_4 = OUTPUT_DIR / "post_2_figure_3.png" # Note what was 4 will now be 3
 
 FIGSIZE = (7.2, 7.2)
 DPI = 180
