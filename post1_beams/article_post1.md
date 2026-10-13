@@ -1,5 +1,5 @@
 # Why Doesn't a Laser Beam Lose Its Shape?
-### Propagating light easily loses its shape, turning everything into a blur — yet laser beams seem to survive. Finding out how this can be leads to discovering a whole family of beams — and a surprising twist at the end.
+### Propagating light easily loses its shape, turning everything into a blur, yet laser beams seem to survive. Finding out how this can be leads to discovering a whole family of beams and a surprising twist at the end.
 ![Feature_image](../outputs/feature_twisted_light.png)
 > Caption: **A helical wavefront — light with a twist.**
 > Alt text: A monochrome 3D rendering of a helical optical wavefront twisting around the direction of propagation, illustrating the spiral phase structure of light carrying orbital angular momentum.
@@ -7,7 +7,7 @@
 
 Send light through an opening of almost any shape — a keyhole, a slit, a square — and diffraction soon blurs that shape into a formless smear. Yet a laser beam can retain its shape while propagating: its bright spot can travel for kilometres and still look almost exactly as it started. How can that be?
 
-It turns out that the familiar shape of a laser beam is a special solution of the paraxial wave equation. The beam expands as it travels, but its shape remains the same. The surprise is that it is not the only one: there is an entire family of beam shapes with this property.
+It turns out that the familiar shape of a laser beam is a special. The beam expands as it travels, but its shape remains the same. The surprise is that it is not the only one: there is an entire family of beam shapes with this property.
 
 And some of these beams have an even stranger feature. Not all of their momentum points forward — part of it points sideways. That transverse momentum can circulate around the beam axis, giving the light orbital angular momentum. The effect is small, but very real: light with this angular momentum can make matter rotate.
 
@@ -41,7 +41,7 @@ This raises the obvious question: is the Gaussian the only shape that survives d
 > Source: Image by author.
 
 ## Some Shapes Are Made to Propagate
-To find out whether there are more shapes that keep their form during propagation, we look for solutions that combine the Gaussian envelope from the previous section with a polynomial *H*(ξ) and an additional phase factor e⁻ⁱⁿψ⁽ᶻ⁾. We use ξ as a scaled transverse coordinate,
+To find out whether there are more shapes that keep their form during propagation, we look for solutions that combine the Gaussian envelope from the previous section with a polynomial *H*(ξ) and an additional phase of *nψ(z)*. We use ξ as a scaled transverse coordinate,
 
 $$
 \xi=\sqrt{2}\,\frac{x}{w(z)}.
@@ -104,11 +104,12 @@ Now the beam no longer looks like a rotated two-lobed mode. Its intensity become
 > Source: Image by author.
 
 ## The Doughnut Is Hiding a Twist
+
 The doughnut-shaped intensity is easy to see, but it isn't the interesting part — a ring of light, by itself, is just a shape like any other. The interesting part is hidden in the phase.
 
 Walk once around the beam axis and the phase completes a full turn of 2π. Follow a surface of constant phase as you also move forward in *z*, and that surface traces a helix around the beam axis. Unlike the earlier combinations of HG₁₀ and HG₀₁, the doughnut has a phase that winds smoothly and continuously around the axis. Depending on whether the relative phase shift is +π/2 or −π/2, the helix winds in one direction or the other.
 
-More generally, vortex modes can wind ℓ times around the axis, with a phase factor *e*ⁱℓφ. Our example has ℓ = +1 or −1, depending on which quarter-cycle phase shift we choose. We can build the higher-order versions of these vortices from higher-order HG modes with *n* + *m* = 2, 3, 4, …. We should only combine modes with the same value of *n* + *m*: otherwise the components accumulate different Gouy phases during propagation, and the combined shape will not remain fixed. For the single-ring vortices we consider here, the magnitude of the winding number is
+More generally, vortex modes can wind ℓ times around the axis, with a phase ℓφ. Our example has ℓ = +1 or −1, depending on which quarter-cycle phase shift we choose. We can build the higher-order versions of these vortices from higher-order HG modes with *n* + *m* = 2, 3, 4, …. We should only combine modes with the same value of *n* + *m*: otherwise the components accumulate different Gouy phases during propagation, and the combined shape will not remain fixed. For the single-ring vortices we consider here, the magnitude of the winding number is
 
 |ℓ| = *n* + *m*.
 
