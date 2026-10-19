@@ -1,4 +1,4 @@
-"""Figure 5 - antibunching, simple version (animated GIF, dark style, same recipe as Fig 3).
+"""Figure 6 - antibunching, simple version (animated GIF, dark style, same recipe as Fig 3).
 
 One source only: a single driven two-level atom (resonance fluorescence).
 Static geometry: atom, beam splitter, two detectors, a delay line on detector 2, a correlator.
@@ -22,7 +22,7 @@ os.chdir("post3b_stellar_interferometry")
 cwd = os.getcwd()
 print(cwd)
 OUT_DIR = Path(".")
-GIF_NAME = "fig5_antibunching.gif"
+GIF_NAME = "fig6_antibunching.gif"
 
 BG, FG, MUTED = "#0e1621", "#d7e0ea", "#8fa3b8"
 BLUE, YEL, PANEL = "#7cc4f2", "#fbbf24", "#2d3b52"
@@ -218,7 +218,7 @@ draw_B(taus[-1]); draw_C(K - 1, final=True)
 frames.append(grab()); durs.append(3500)
 
 for name, idx in (("a", 0), ("b", 12), ("c", 28), ("d", len(frames) - 1)):
-    frames[idx].save(OUT_DIR / f"fig5_frame_{name}.png")
+    frames[idx].save(OUT_DIR / f"fig6_frame_{name}.png")
 pal = [f.quantize(colors=96, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE) for f in frames]
 out = OUT_DIR / GIF_NAME
 pal[0].save(out, save_all=True, append_images=pal[1:], duration=durs, loop=0, optimize=True, disposal=1)
