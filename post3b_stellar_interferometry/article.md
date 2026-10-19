@@ -3,12 +3,12 @@
 
 ![Feature image](betelgeuse.jpg)
 > Caption: **Betelgeuse**
-> Alt text: Image of Betelgeuse
+> Alt text: Telescope photograph of the night sky with many stars and other objects. Betelgeuse is a very bright, relatively large object at the centre of the image.
 > Source: Adam Block, Mount Lemmon SkyCentre, University of Arizona. Used with permission.
 
 A photodetector clicks, and each click is a discrete event. It is tempting to read it as a photon arriving. But if we treat the light as a classical wave and only the detector quantum mechanically (the semiclassical picture), the clicks will still appear. They come at random times, at a rate set by the intensity of the light. The discreteness can come from the detector rather than from the light.
 
-A bright wave gives many clicks, a weak wave few, and a fluctuating wave gives click rates that follow its fluctuations. The photoelectric effect, the historical argument for photons, can be explained in this way [1]. So the clicks themselves, and the rate at which they arrive, do not require a quantum theory of light.
+A bright wave gives many clicks, a weak wave few, and a fluctuating wave gives click rates that follow its fluctuations. The main features of the photoelectric effect, the historical argument for photons, can be explained in this way [1]. So the clicks themselves, and the rate at which they arrive, do not require a quantum theory of light.
 
 > **Individual Clicks Don’t Prove Light Is Quantum**
 
@@ -22,7 +22,7 @@ It took until 1920 for this idea to be put into practice. At Mount Wilson in Cal
 
 ![Figure 1](figure1_michelson_vary_slit_separation.gif)
 > Caption: **Figure 1. Michelson's method for measuring the angular diameter of a star. Light from different points on the stellar disk produces slightly shifted interference fringes. As the separation between the two apertures increases, the combined fringes lose contrast. The first disappearance reveals the star's angular diameter.**
-> Alt text: Diagram of a star observed through two separated apertures. Light from different points on the star produces overlapping interference patterns, whose combined fringe contrast decreases as the aperture separation increases.
+> Alt text: Animation of an extended star observed through two apertures. As the separation between the apertures increases, the interference pattern changes and a plot of fringe contrast falls, until the fringes disappear at a separation that gives the star's angular diameter.
 > Source: Image by author.
 
 ## A New Way to Measure Starlight
@@ -30,8 +30,8 @@ It took until 1920 for this idea to be put into practice. At Mount Wilson in Cal
 Before and after the Second World War, radio astronomy flourished. As in optical astronomy, radio astronomers wanted a way to measure the angular diameter of celestial sources. Using the principle of Michelson and Pease would mean combining the radio waves from two antennas far apart, with long cables whose phase had to stay stable, while the ionosphere kept disturbing that phase. Hanbury Brown and Twiss (HBT) proposed to skip the optical combination and move to what they called “intensity interferometry” [3, 4]. Rather than two slits with one detector, they used two detectors at a certain distance, and compared the intensity signals.
 
 ![Figure 2](figure2_interferometry.png)
-> Caption: **Figure 2. Two ways to measure the angular separation of light sources. Michelson combines the light from two apertures and measures interference fringes. Hanbury Brown and Twiss measure correlations between the signals of two separated detectors, without combining the light optically.**
-> Alt text: Comparison of Michelson and Hanbury Brown–Twiss interferometers. Two point sources illuminate two separated observation points. The Michelson arrangement combines the incoming light to produce fringes, while the HBT arrangement measures and correlates two detector signals.
+> Caption: **Figure 2. Two ways to measure the angular size of a star. Michelson combines the light from two apertures and measures interference fringes. Hanbury Brown and Twiss measure correlations between the signals of two separated detectors, without combining the light optically.**
+> Alt text: Comparison of Michelson and Hanbury Brown–Twiss interferometers observing an extended star. In the Michelson arrangement, light collected at two apertures is combined to produce interference fringes. In the HBT arrangement, two separated detectors record the intensity independently and their signals are correlated.
 > Source: Image by author.
 
 Starlight is chaotic: its intensity flickers randomly, so each detector produces what looks like noise. The question is whether the correlation between these two noisy signals carries relevant information.
@@ -40,11 +40,11 @@ Take a simple case, two independent point sources *a* and *b* a small angle θ a
 
 > **Michelson used interference to measure a star. HBT discovered that correlations could do the same job.**
 
-The correlation between the two signals oscillates with the detector separation: it is largest when the detectors sit on top of each other, falls to the level of unrelated signals, and returns to its maximum after one period. The period tells us the angular separation of the sources. For an extended source the oscillations wash out, and the first drop to the unrelated level gives its size, just as the first disappearance of the fringes did for Michelson.
+The correlation between the two signals oscillates with the detector separation: it is largest when the detectors sit on top of each other, falls to the level of unrelated signals, and returns to its maximum after one period. The period tells us the angular separation of the sources. For an extended source the oscillations wash out, and the first drop to the unrelated level gives its size (for a source of known shape, such as a uniform disk), just as the first disappearance of the fringes did for Michelson.
 
 ![Figure 3](fig3_hbt_classical.gif)
 > Caption: **Figure 3. For two independent point sources, the correlation between two detectors oscillates as their separation changes. The period is determined by the angular separation of the sources. For an extended source, contributions from many points wash out the oscillations, allowing its angular size to be determined.**
-> Alt text: Graph of intensity correlation versus detector separation. The correlation oscillates periodically for two point sources. A second curve representing an extended source shows reduced contrast as detector separation increases.
+> Alt text: Animated simulation of two independent chaotic point sources illuminating two detectors. As detector separation changes, the intensity traces become more or less correlated, the scatter plot of their instantaneous values changes shape, and the normalized correlation oscillates between approximately 1 and 2.
 > Source: Image by author.
 
 ## Photons Aren’t Supposed to Arrive Together. Or Are They?
@@ -65,7 +65,7 @@ In HBT we see the effect as a correlation between detectors at different locatio
 
 Take two independent sources *a* and *b*, and detectors 1 and 2. A coincidence with one photon from each source can come about in two ways: *a* is detected at 1 and *b* at 2, or *a* at 2 and *b* at 1. If nothing tells us which of the two happened, they are not separate events, and their amplitudes add: they can strengthen or cancel each other. Note the subtlety: this is not interference of photons with each other, but of the amplitudes of two indistinguishable alternatives that lead to the same outcome. The relative phase between them is geometrical, set by the difference between the extra paths to detector 2 from *a* and from *b*; it equals *kd*θ. The random phases of the sources are the same in both alternatives and drop out.
 
-Adding the two amplitudes gives a cross-source contribution that varies as 1 + cos(*kd*θ). It is twice the independent value when the detectors sit on top of each other, zero at half a period, and back to twice after a full period. This two-photon interference is only one part of all coincidences that can occur. Photons from the same source also coincide, independent of *d*, so the *d*-dependent signal comes on top of a constant baseline.
+Adding the two amplitudes gives a cross-source contribution that varies as 1 + cos(*kd*θ). It is twice the independent value when the detectors sit on top of each other, zero at half a period, and back to twice after a full period. This two-photon interference is only one part of all coincidences that can occur. For independent chaotic sources like these, photons from the same source also coincide, independent of *d*, so the *d*-dependent signal comes on top of a constant baseline.
 
 ![Figure 4](fig4_two_alternatives.gif)
 > Caption: **Figure 4. A coincidence between two detectors can arise in two indistinguishable ways: a photon from source a reaches detector 1 and one from b reaches detector 2, or the other way around. Their probability amplitudes interfere, producing a correlation that depends on the path-length differences.**
@@ -82,9 +82,9 @@ But this triggers a question: if photons can bunch, could they also antibunch? C
 
 ## What If Photons Avoid Each Other Instead?
 
-To compare bunching and antibunching we need one number. We express the correlation as g⁽²⁾: g⁽²⁾(d) for two detectors a distance *d* apart, or g⁽²⁾(τ) for clicks separated by a delay τ. It is the average of the product of the two intensities at different moments or positions, I₁I₂, divided by the product of their averages. In the notation, the (2) makes clear that it is not a square, but a second-order correlation.
+To compare bunching and antibunching we need one number. We express the correlation as g⁽²⁾: g⁽²⁾(d) for two detectors a distance *d* apart, or g⁽²⁾(τ) for clicks separated by a delay τ. In the semiclassical description, it is the average of the product of the two intensities at different moments or positions, I₁I₂, divided by the product of their averages. In the notation, the (2) makes clear that it is not a square, but a second-order correlation.
 
-For unrelated signals it equals 1. Unrelated can be signals from independent sources, but can also be signals from the same source with a large time difference. So, for g⁽²⁾(τ) with τ very large we expect g⁽²⁾ to be 1. At zero time difference, or when the detector positions overlap, we can write for a classical stochastic intensity
+For unrelated signals it equals 1. Unrelated can be signals from independent sources, but can also be signals from the same source with a large time difference. So, for the sources considered here, g⁽²⁾(τ) approaches 1 once τ is much longer than their correlation time. At zero time difference, or when the detector positions overlap, we can write for a classical stochastic intensity
 
 $$
 g^{(2)}(0)
@@ -93,9 +93,9 @@ g^{(2)}(0)
 \geq1.
 $$
 
-For a constant intensity (to a good approximation a laser), ⟨*I*²⟩ = ⟨*I*⟩² and g⁽²⁾(0) = 1. For chaotic light, whose intensity is exponentially distributed, ⟨*I*²⟩ = 2⟨*I*⟩² and g⁽²⁾(0) = 2. Since the variance of a classical intensity is never negative, g⁽²⁾(0) is always equal to or larger than 1.
+For a constant intensity (to a good approximation a laser), ⟨*I*²⟩ = ⟨*I*⟩² and g⁽²⁾(0) = 1. For chaotic light, whose intensity is exponentially distributed, ⟨*I*²⟩ = 2⟨*I*⟩² and g⁽²⁾(0) = 2. Since the variance of a classical intensity is never negative, g⁽²⁾(0) is always equal to or larger than 1. Note what this bound covers: the correlation of a classical intensity with itself at zero delay, or equivalently the two outputs of a 50/50 splitter illuminated by the same classical source. It does not forbid two unrelated classical signals from being anticorrelated.
 
-Let's for now ignore that limitation and look at what it means for g⁽²⁾ to be larger than, equal to, or smaller than 1. Figure 5 shows the three cases. Detector 1 always sees the same noisy signal.
+Let's for now ignore that limitation and look at what it means for g⁽²⁾ to be larger than, equal to, or smaller than 1. Figure 5 shows the three cases. All three sources have approximately the same average photon count, but their fluctuations differ.
 
 In the first case, detector 2 sees the same signal (the splitter splits the incoming light into two equal beams) and g⁽²⁾ > 1. In the middle panel, the signal at detector 2 is not correlated to that at detector 1, as if the light came from independent sources, or as if the noise came from the independent detection process at each detector (g⁽²⁾ = 1). In the third case, the signal at detector 2 has the opposite fluctuations from detector 1: if one goes high, the other goes low (and vice versa) (g⁽²⁾ < 1). With a passive beam splitter, this cannot be explained in a classical model. The light, and not only the detector, would have to be quantized. A stream of photons that arrive at regular spacing, each going to one detector or the other, would give exactly this signal. This would be a true quantum effect, beyond the semiclassical interpretation. But is this a figment of the imagination, or could this type of light really be made?
 
@@ -106,11 +106,11 @@ In the first case, detector 2 sees the same signal (the splitter splits the inco
 
 ## When Photons Avoid Each Other, Classical Physics Falls Short
 
-Imagine a single atom as a light source. The atom is excited by a laser and produces a photon when it falls back to the ground state. Right after emitting, it cannot emit again: it first has to be excited again, which typically takes nanoseconds. Such an isolated atom would produce an antibunched photon stream, with g⁽²⁾ smaller than 1.
+A source with a nearly fixed number of photons per time window is only one way to get g⁽²⁾ smaller than 1. Could photons also avoid arriving close together in time? Imagine a single atom as a light source. The atom is excited by a laser and produces a photon when it falls back to the ground state. Right after emitting, it cannot emit again: it first has to be excited again, which typically takes nanoseconds. Such an isolated atom would produce an antibunched photon stream, with g⁽²⁾ smaller than 1.
 
 > **And Kimble, Dagenais and Mandel finally measured a correlation that could not be explained without quantizing the light itself.**
 
-In 1977, Kimble, Dagenais and Mandel at the University of Rochester did the experiment [11]. A laser beam crossed a thin beam of sodium atoms, so thin that only one or two atoms were in the field of view at any moment. They used a beam splitter to split the light from the atoms to two detectors. One detector started a timer upon detecting a photon, the other stopped the timer. The histogram of the measured delays is the correlation g⁽²⁾(τ). Figure 6 shows the idea: one atom, a beam splitter, two detectors, and the correlation built up one delay at a time. They found the fewest pairs at zero delay, and more and more pairs as the delay grew. Corrected for stray laser light, g⁽²⁾ at zero delay came out at about 0.4 (not 0, probably because sometimes more than one atom radiated). This was a clear experimental result that could not be explained by treating light as a classical wave. Kimble, Dagenais and Mandel were the first to observe photon antibunching: direct evidence that the light itself has to be quantized.
+In 1977, Kimble, Dagenais and Mandel at the University of Rochester did the experiment [11]. A laser beam crossed a thin beam of sodium atoms, so thin that only one or two atoms were in the field of view at any moment. They used a beam splitter to split the light from the atoms to two detectors. One detector started a timer upon detecting a photon, the other stopped the timer. After normalization, the histogram of the measured delays gives g⁽²⁾(τ). Figure 6 shows the idea: one atom, a beam splitter, two detectors, and the correlation built up one delay at a time. They found the fewest pairs at zero delay, and more and more pairs as the delay grew. Corrected for stray laser light, g⁽²⁾ at zero delay came out at about 0.4 (not 0, probably because sometimes more than one atom radiated). This was a clear experimental result that could not be explained by treating light as a classical wave. Kimble, Dagenais and Mandel were the first to observe photon antibunching: direct evidence that the light itself has to be quantized.
 
 ![Figure 6](fig6_antibunching.gif)
 > Caption: **Figure 6. A single atom emits photons that are divided between two detectors by a beam splitter. Each detection at the first detector starts a timer; a detection at the second stops it. Accumulating many delays reveals a dip in the coincidence rate near zero delay: immediately after emitting a photon, the atom must be excited again before it can emit another. For an ideal single atom the dip reaches zero; Kimble, Dagenais and Mandel measured about 0.4.**
@@ -121,7 +121,7 @@ In 1977, Kimble, Dagenais and Mandel at the University of Rochester did the expe
 
 In this discussion of the HBT effect we have alternated between light as a wave, light as a stream of indivisible particles, and the bosonic picture in which detector clicks tend to group together. At the time of this story these intuitions co-existed, and Hanbury Brown and Twiss themselves appealed to Bohr’s complementarity: a given experiment can show the wave aspect of light or the particle aspect, but not both [9]. The HBT effect and the controversy around it forced sharper thinking about light as a quantum phenomenon. As we have seen, it prepared the way for experiments on states of light that have no (semi)classical explanation. Some consider this episode the beginning of quantum optics. The first lasers, in 1960, made the question urgent: what are the correlations of photons in a laser beam? The theory of quantum optics was developed by Glauber [12, 13]. In his Nobel lecture he describes the HBT correlation as something altogether new that called for a clear explanation. Of Dirac’s remark that a photon only interferes with itself, he writes: “It is not the photons that interfere physically, it is their probability amplitudes that interfere” [12]. The HBT puzzle set him on the path to the theory that describes the difference between thermal light and laser light.
 
-And what happened to the ambition of HBT to measure stars? From the lab they took the optical measurements back outside. In the winter of 1955–56, with two army searchlight mirrors and mostly poor weather (five months of observing that added up to 18 hours. Today this is still considered a [brutal winter](https://youtu.be/ZPOtDY3mQYc?si=agDthwP6EYby4W43) ), they measured the angular diameter of Sirius [14, 15]. From this success they went on to build the Narrabri Stellar Intensity Interferometer in Australia (a more agreeable climate for astronomy): two mirrors of 6.7 metres on a circular track 188 metres across [15]. It measured the angular diameters of hot, bright stars such as Vega, β Crucis and Altair, which Michelson’s interferometer could not reach [15, 16].
+And what happened to the ambition of HBT to measure stars? From the lab they took the optical measurements back outside. In the [brutal winter](https://youtu.be/ZPOtDY3mQYc?si=agDthwP6EYby4W43) of 1955–56, with two army searchlight mirrors and mostly poor weather, they measured the angular diameter of Sirius [14, 15]. Five months of observing added up to only 18 hours. From this success they went on to build the Narrabri Stellar Intensity Interferometer in Australia: two mirrors of 6.7 metres on a circular track 188 metres across [15]. It measured the angular diameters of hot, bright stars such as Vega, β Crucis and Altair, which Michelson’s interferometer could not reach [15, 16].
 
 In the next post we follow Glauber and look at the different states of light, and how they fit into one all-encompassing theory.
 
