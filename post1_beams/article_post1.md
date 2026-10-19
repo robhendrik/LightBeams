@@ -1,6 +1,6 @@
 # Why Doesn't a Laser Beam Lose Its Shape?
 ### Propagating light easily loses its shape, turning everything into a blur, yet laser beams seem to survive. Finding out how this can be leads to discovering a whole family of beams and a surprising twist at the end.
-![Feature_image](../outputs/feature_twisted_light.png)
+![Feature_image](../outputs/feature_twisted_light_tube.png)
 > Caption: **A helical wavefront — light with a twist.**
 > Alt text: A monochrome 3D rendering of a helical optical wavefront twisting around the direction of propagation, illustrating the spiral phase structure of light carrying orbital angular momentum.
 > Source: Image by author.
