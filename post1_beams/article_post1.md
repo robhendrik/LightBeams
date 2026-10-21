@@ -111,7 +111,9 @@ Walk once around the beam axis and the phase completes a full turn of 2π. Follo
 
 More generally, vortex modes can wind ℓ times around the axis, with a phase ℓφ. Our example has ℓ = +1 or −1, depending on which quarter-cycle phase shift we choose. We can build the higher-order versions of these vortices from higher-order HG modes with *n* + *m* = 2, 3, 4, …. We should only combine modes with the same value of *n* + *m*: otherwise the components accumulate different Gouy phases during propagation, and the combined shape will not remain fixed. For the single-ring vortices we consider here, the magnitude of the winding number is
 
-|ℓ| = *n* + *m*.
+$$
+|\ell| = n + m
+$$
 
 The sign of ℓ determines the direction in which the phase helix winds.
 

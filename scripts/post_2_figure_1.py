@@ -94,14 +94,14 @@ def main():
 
     # Start/end far enough away that the Gaussian is effectively invisible
     # before the animation loops.
-    x_start = X_MIN - 4.5 * SIGMA
-    x_end = X_MAX + 4.5 * SIGMA
+    x_start = X_MIN - 2.5 * SIGMA
+    x_end = X_MAX + 2.5 * SIGMA
 
     duration = (x_end - x_start) / WAVE_SPEED
     video_seconds = duration / TIME_UNITS_PER_VIDEO_SECOND
     n_frames = int(np.ceil(video_seconds * FPS))
     times = np.linspace(0.0, duration, n_frames, endpoint=False)
-    times = (times + 0.5 * duration) % duration
+    #times = (times + 0.5 * duration) % duration
 
     fig, ax = plt.subplots(figsize=FIGSIZE)
     style_axes(ax)
