@@ -46,7 +46,7 @@ E(\mathbf{r},z,t)
 \propto
 A(t)u(\mathbf{r},z)
 +
-A^*(t)u^*(\mathbf{r},z).
+A^*(t)u^*(\mathbf{r},z)
 $$
 
 All the spatial structure sits in *u(**r**,z)*; all the time dependence sits in *A(t)*. For a mode with a single frequency ω, *A(t)* simply rotates in the complex plane at that frequency.
@@ -56,13 +56,13 @@ We can picture *A* as a point in a plane, as shown in Figure 2. The distance fro
 To find the energy of the field, we integrate its energy density over space. The electric and magnetic fields contribute equally to the steady energy. We can absorb the magnetic contribution into our normalization and write, schematically,
 
 $$
-H\propto\int E^2\,dV.
+H\propto\int E^2\,dV
 $$
 
 Put our expression for the field into this integral and four terms appear. Two oscillate at twice the optical frequency, but the magnetic field contributes matching terms that cancel them. What remains are two terms with the same spatial integral:
 
 $$
-H=\frac{\omega}{2}\left(A^*A+AA^*\right),
+H=\frac{\omega}{2}\left(A^*A+AA^*\right)
 $$
 
 where we have chosen the normalization of *A* so that the constant in front is ω/2.
@@ -70,13 +70,13 @@ where we have chosen the normalization of *A* so that the constant in front is �
 Since *A* and *A*\* are ordinary complex numbers, their order makes no difference: *A*\**A* = *AA*\*. Classically, then, we could simply write
 
 $$
-H=\omega|A|^2.
+H=\omega|A|^2
 $$
 
 We are going to resist that simplification. The reason will become clear when we quantize the field. For now, we keep the two terms in their original order:
 
 $$
-H=\frac{\omega}{2}\left(A^*A+AA^*\right).
+H=\frac{\omega}{2}\left(A^*A+AA^*\right)
 $$
 
 In the classical picture, there is nothing special about any particular radius in Figure 2. *A* can sit anywhere in the plane, giving the field a definite amplitude and phase. Its energy can therefore take any value from zero upward. Put *A* at the origin and the field, and its energy, vanish.
@@ -93,7 +93,7 @@ That is the picture we are about to quantize.
 To quantize a classical system, we start from its Hamiltonian — the expression for its energy — and replace its classical variables by operators. For our single mode, we deliberately kept the classical Hamiltonian in the form in which it arose from the field:
 
 $$
-H=\frac{\omega}{2}\left(A^*A+AA^*\right).
+H=\frac{\omega}{2}\left(A^*A+AA^*\right)
 $$
 
 Now comes the crucial step. We promote *A* and *A*\* from ordinary numbers to operators, Â and Â†. Operators act on quantum states, and unlike ordinary numbers, their order can matter. Applying Â first and Â† second need not give the same result as applying them in the opposite order. The difference between those two orders is written using a **commutator**:
@@ -101,13 +101,13 @@ Now comes the crucial step. We promote *A* and *A*\* from ordinary numbers to op
 $$
 [\hat A,\hat A^\dagger]
 =
-\hat A\hat A^\dagger-\hat A^\dagger\hat A.
+\hat A\hat A^\dagger-\hat A^\dagger\hat A
 $$
 
 For our electromagnetic mode, quantization means imposing
 
 $$
-[\hat A,\hat A^\dagger]=\hbar.
+[\hat A,\hat A^\dagger]=\hbar
 $$
 
 > **This is where the quantization happens. We have replaced two classical quantities that commute with two quantum operators that do not. The difference made by changing their order is set by the fundamental quantum constant: Planck's constant ℏ (= *h*/2π).**
@@ -117,7 +117,7 @@ Readers familiar with quantum mechanics will recognise this from the harmonic os
 The quantum Hamiltonian now becomes
 
 $$
-\hat H=\frac{1}{2}\omega(\hat A^\dagger\hat A+\hat A\hat A^\dagger).
+\hat H=\frac{1}{2}\omega(\hat A^\dagger\hat A+\hat A\hat A^\dagger)
 $$
 
 From the commutator,
@@ -125,7 +125,7 @@ From the commutator,
 $$
 \hat A\hat A^\dagger
 =
-\hat A^\dagger\hat A+\hbar,
+\hat A^\dagger\hat A+\hbar
 $$
 
 so we can rewrite the Hamiltonian as
@@ -135,7 +135,7 @@ $$
 =
 \omega\hat A^\dagger\hat A
 +
-\frac{1}{2}\hbar\omega.
+\frac{1}{2}\hbar\omega
 $$
 
 Here the quantum picture departs from the classical one. Classically, we could take *A* all the way to zero and make the energy vanish. Now the commutator leaves behind an irreducible ½ℏω.
@@ -147,9 +147,9 @@ But we have not yet found the rest of the allowed energies. For that, we need to
 It is convenient to absorb ℏ into the definition of the operators:
 
 $$
-\hat a=\frac{\hat A}{\sqrt{\hbar}},
+\hat a=\frac{\hat A}{\sqrt{\hbar}}
 \qquad
-\hat a^\dagger=\frac{\hat A^\dagger}{\sqrt{\hbar}}.
+\hat a^\dagger=\frac{\hat A^\dagger}{\sqrt{\hbar}}
 $$
 
 Then
@@ -161,7 +161,7 @@ $$
 and the Hamiltonian becomes
 
 $$
-\hat H=\hbar\omega\left(\hat a^\dagger\hat a+\frac{1}{2}\right).
+\hat H=\hbar\omega\left(\hat a^\dagger\hat a+\frac{1}{2}\right)
 $$
 
 Now, what exactly is the meaning of these operators â and â†? We will see that they play a very intuitive role. The Hamiltonian contains the combination â†â. Think of its value as telling us how far up the energy scale the mode sits. Our commutator tells us that reversing the order adds exactly one:
@@ -169,7 +169,7 @@ Now, what exactly is the meaning of these operators â and â†? We will see th
 $$
 \hat a\hat a^\dagger
 =
-\hat a^\dagger\hat a+1.
+\hat a^\dagger\hat a+1
 $$
 
 One can show from this relation that applying â† raises the value of â†â by one, while applying â lowers it by one. Because each unit in the Hamiltonian is multiplied by ℏω, applying â lowers the energy by ℏω and applying â† raises it by ℏω. That is why these operators are called the **lowering** and **raising** operators.
@@ -179,7 +179,7 @@ One can show from this relation that applying â† raises the value of â†â 
 Applying â repeatedly takes us down the ladder one step at a time. Eventually we must stop, because â†â cannot have a negative value, so there is a lowest state. There, applying â gives zero, so â†â is zero. This is the **vacuum state** of the mode. But zero excitations does not mean zero energy. The Hamiltonian then gives
 
 $$
-E_0=\frac{1}{2}\hbar\omega.
+E_0=\frac{1}{2}\hbar\omega
 $$
 
 What is the meaning of the ½ℏω at the bottom of the ladder? Every mode has this lowest energy. Summed over all possible modes, these zero-point energies give an infinite result, which we normally subtract away. But that does not mean the vacuum is featureless. The field still fluctuates, and those vacuum fluctuations can show up as quantum noise in sensitive optical measurements and play a role in spontaneous emission.

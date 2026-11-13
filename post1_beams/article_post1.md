@@ -17,7 +17,7 @@ Consider a beam that travels in the *z* direction and, for simplicity, has an am
 $$
 i \frac{\partial u}{\partial z}
 =
--\frac{1}{2k}\frac{\partial^2 u}{\partial x^2}.
+-\frac{1}{2k}\frac{\partial^2 u}{\partial x^2}
 $$
 
 The second derivative in the transverse direction (*x*) drives the evolution in *z*, so sharp edges and narrow features change rapidly as the beam propagates. Diffraction immediately reshapes a slit, a hard edge, or almost any other profile.
@@ -28,7 +28,7 @@ $$
 u(x,z)=\frac{1}{\sqrt{w(z)}}
 e^{-x^2/w(z)^2}
 e^{ikx^2/2R(z)}
-e^{-i\psi(z)/2}.
+e^{-i\psi(z)/2}
 $$
 
 When we put this shape into the wave equation, we find that it is an exact solution. The beam has a Gaussian intensity profile — the familiar bell-curve shape. Its width *w(z)* changes as the wave propagates, but the Gaussian shape itself does not. The beam also has a curved wavefront, with radius *R(z)*, while *ψ(z)* represents a phase shift that builds up during propagation, known as the **Gouy phase**.
@@ -44,13 +44,13 @@ This raises the obvious question: is the Gaussian the only shape that survives d
 To find out whether there are more shapes that keep their form during propagation, we look for solutions that combine the Gaussian envelope from the previous section with a polynomial *H*(ξ) and an additional phase of *nψ(z)*. We use ξ as a scaled transverse coordinate,
 
 $$
-\xi=\sqrt{2}\,\frac{x}{w(z)}.
+\xi=\sqrt{2}\,\frac{x}{w(z)}
 $$
 
 When we put this form into the paraxial wave equation, the *z*-dependence separates out. What remains is a differential equation for *H*(ξ):
 
 $$
-H''(\xi)-2\xi H'(\xi)+2nH(\xi)=0.
+H''(\xi)-2\xi H'(\xi)+2nH(\xi)=0
 $$
 
 This is a well-known equation, the Hermite equation. Its polynomial solutions exist only when *n* is a non-negative integer, *n* = 0, 1, 2, …, giving the Hermite polynomials Hₙ(ξ). The corresponding one-dimensional modes are
@@ -61,7 +61,7 @@ u_n(x,z)\propto
 e^{-\xi^2/2}
 H_n(\xi)
 e^{ikx^2/2R(z)}
-e^{-i\left(n+\tfrac{1}{2}\right)\psi(z)}.
+e^{-i\left(n+\tfrac{1}{2}\right)\psi(z)}
 $$
 
 For *n* = 0 we get the ordinary Gaussian we have seen before. For *n* = 1, 2, 3, …, extra nodes and lobes appear, but the rescaled shape is still preserved during propagation. These are the one-dimensional Hermite–Gaussian modes. The Gaussian is not one special survivor; it is the first member of a whole family.
@@ -83,7 +83,7 @@ The mathematics is the same; the physical meaning is different.
 Now consider a field *u*(*x*, *y*, *z*) that varies in both *x* and *y*. Since the paraxial equation does not mix the two transverse directions, we can solve them separately and multiply the two one-dimensional modes:
 
 $$
-u_{n,m}(x,y,z)=u_n(x,z)\,u_m(y,z).
+u_{n,m}(x,y,z)=u_n(x,z)\,u_m(y,z)
 $$
 
 Its Gouy phase is (*n* + *m* + 1) *ψ*(*z*). Only the sum *n* + *m* matters. Two beams with different shapes but the same *n* + *m* therefore accumulate the same phase as they propagate, so a fixed combination of them remains a fixed combination.
@@ -93,7 +93,7 @@ The simplest example is *n* + *m* = 1: HG₁₀ and HG₀₁, one lobed along *x
 But instead of only adding or subtracting the two modes, we can give one of them a phase shift before combining them. For example, give them a quarter-cycle, or π/2, phase difference:
 
 $$
-\text{HG}_{10}+i\,\text{HG}_{01}.
+\text{HG}_{10}+i\,\text{HG}_{01}
 $$
 
 Now the beam no longer looks like a rotated two-lobed mode. Its intensity becomes a doughnut. More importantly, something interesting happens to the phase: instead of jumping across a node, it winds smoothly around the dark centre. These vortex modes are usually described as Laguerre–Gaussian (LG) modes; we will simply call them doughnut or vortex beams here.
