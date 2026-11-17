@@ -73,7 +73,7 @@ $$
 a|\alpha\rangle=\alpha|\alpha\rangle,
 $$
 
-where a is the annihilation operator we introduced in our earlier discussion of quantizing light. Because the state is an eigenstate, each annihilation operator acting on it contributes a complex amplitude, while the corresponding creation operators contribute its complex conjugate when acting on the bra. The normally ordered correlations therefore factorize.
+Here, a is the annihilation operator we introduced in our earlier discussion of quantizing light. Because the state is its eigenstate, the quantum correlations factorize into products of ordinary complex amplitudes, just as we expected for independent photon detections.
 
 These states are called coherent states, or Glauber coherent states [7].
 
